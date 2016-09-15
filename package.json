@@ -1,0 +1,25 @@
+{
+    "name": "ddq-mysql",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "contributors": [
+        {
+            "name": "Chris Tetreault",
+            "url": "https://github.com/AbsentSemicolon"
+        },
+        {
+            "name": "Lucas Nagle",
+            "url": "https://github.com/lnagle93"
+        }
+    ],
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+        "node-mysql": "^0.4.2"
+    }
+}
