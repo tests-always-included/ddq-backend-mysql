@@ -1,0 +1,13 @@
+{
+    "cycleInterval": 5000,
+    "database": {
+        "host": "localhost",
+        "ip": "0.0.0.0",
+        "name": null,
+        "password": null,
+        "port": 3333,
+        "table": null,
+        "user": null
+    },
+    "heartbeatLifetimeSeconds": 20000,
+}
