@@ -9,5 +9,5 @@
         "table": null,
         "user": null
     },
-    "heartbeatLifetimeSeconds": 20000,
+    "heartbeatLifetimeSeconds": 5000,
 }
