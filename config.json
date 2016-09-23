@@ -7,5 +7,6 @@
     "password": null,
     "port": 3333,
     "table": null,
+    "topics": null,
     "user": null
 }
