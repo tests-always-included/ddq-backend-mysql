@@ -1,12 +1,13 @@
 {
     "name": "ddq-mysql",
     "version": "1.0.0",
-    "description": "",
+    "description": "A backend plugin that DeDuplicated Queue (DDQ) can use to communicate with a MySQL database",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "istanbul cover jasmine-node --captureExceptions spec/ && codecov && eslint .",
+        "watch": "jasmine-node lib spec --autotest --watch"
     },
-    "author": "",
+    "author": "DDQ Team",
     "contributors": [
         {
             "name": "Chris Tetreault",
@@ -17,9 +18,15 @@
             "url": "https://github.com/lnagle93"
         }
     ],
-    "license": "UNLICENSED",
-    "private": true,
+    "license": "MIT",
     "dependencies": {
-        "node-mysql": "^0.4.2"
+        "mysql": "^2.11.1"
+    },
+    "devDependencies": {
+        "codecov": "^1.0.1",
+        "eslint": "^2.10.2",
+        "istanbul": "^0.4.5",
+        "jasmine-node": "^1.14.5",
+        "mock-require": "^1.3.0"
     }
 }
