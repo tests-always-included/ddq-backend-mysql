@@ -1,13 +1,11 @@
 {
-    "cycleInterval": 5000,
-    "database": {
-        "host": "localhost",
-        "ip": "0.0.0.0",
-        "name": null,
-        "password": null,
-        "port": 3333,
-        "table": null,
-        "user": null
-    },
-    "heartbeatLifetimeSeconds": 5000,
+    "createMessageCycleLimit": 10,
+    "heartbeatCleanupDelay": 60000,
+    "host": "localhost",
+    "ip": "0.0.0.0",
+    "name": null,
+    "password": null,
+    "port": 3333,
+    "table": null,
+    "user": null
 }
