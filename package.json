@@ -18,6 +18,10 @@
             "url": "https://github.com/lnagle93"
         }
     ],
+    "keywords": [
+        "mysql",
+        "queue"
+    ],
     "license": "MIT",
     "dependencies": {
         "mysql": "^2.11.1"
