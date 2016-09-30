@@ -1,10 +1,10 @@
 "use strict";
 
 describe("lib/ddq-backend-mysql", () => {
-    var instance;
+    var instance, mysqlMock;
 
     beforeEach(() => {
-        var config, configValidation, crypto, EventEmitterMock, mysqlMock,
+        var config, configValidationMock, crypto, EventEmitterMock,
             Plugin, timersMock;
 
         config = {
@@ -20,31 +20,39 @@ describe("lib/ddq-backend-mysql", () => {
             user: "exampleUser",
             password: "examplePassword"
         };
-        configValidation = require("../../lib/config-validation")();
+        configValidationMock = jasmine.createSpyObj("configValidationMock", [
+            "validateConfig"
+        ]);
         crypto = require("crypto");
-        EventEmitterMock = require("../mock/event-emitter-mock")();
-        mysqlMock = require("../mock/mysql-mock")();
-        timersMock = require("../mock/timersMock")();
+        EventEmitterMock = require("./mock/event-emitter-mock")();
+        mysqlMock = require("./mock/mysql-mock")();
+        timersMock = require("./mock/timersMock")();
 
-        Plugin = require("../../lib/ddq-backend-mysql")(config, configValidation, crypto, EventEmitterMock, mysqlMock, timersMock);
-        // console.log(Plugin);
+        Plugin = require("../../lib/ddq-backend-mysql")(config, configValidationMock, crypto, EventEmitterMock, mysqlMock, timersMock);
         instance = new Plugin();
     });
     describe(".checkNow", () => {
 
     });
     describe(".connect", () => {
-
+        it("creates a MySQL connection", () => {
+            instance.connect(() => {});
+            expect(mysqlMock.createConnection).toHaveBeenCalledWith(jasmine.any(Object));
+        });
+        // it("throws an error if there's a problem creating the connection", () => {
+        //     instance.connect(() => {});
+        //     expect(instance.connection).toThrow();
+        // });
     });
     describe(".delete", () => {
+
 
     });
     describe(".disconnect", () => {
         it("ends the connection", () => {
-            console.log("here");
-            console.log(instance);
-            instance.disconnect();
-            expect(instance.connection.end).toHaveBeenCalled();
+            instance.connect(() => {});
+            instance.disconnect(() => {});
+            expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
         });
     });
     describe(".getRecord", () => {
