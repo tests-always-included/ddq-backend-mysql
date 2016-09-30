@@ -32,7 +32,6 @@ describe("lib/ddq-backend-mysql", () => {
         instance = new Plugin();
     });
     describe(".checkNow", () => {
-
     });
     describe(".connect", () => {
         it("creates a MySQL connection", () => {
@@ -45,8 +44,6 @@ describe("lib/ddq-backend-mysql", () => {
         // });
     });
     describe(".delete", () => {
-
-
     });
     describe(".disconnect", () => {
         it("ends the connection", () => {
@@ -56,10 +53,24 @@ describe("lib/ddq-backend-mysql", () => {
         });
     });
     describe(".getRecord", () => {
-
+        it("", () => {
+            instance.connect(() => {});
+            instance.getRecord(123, () => {});
+            expect(instance.connection.query).toHaveBeenCalled();
+        });
     });
     describe(".listen", () => {
-
+        beforeEach(() => {
+            instance.currentlyPolling = false;
+            spyOn(instance, "poll");
+        });
+        it("Sets the flag and calls functions", () => {
+            expect(instance.restorer).toBe(null);
+            instance.listen();
+            expect(instance.currentlyPolling).toBe(true);
+            expect(instance.poll).toHaveBeenCalled();
+            expect(instance.restorer).not.toBe(null);
+        });
     });
     describe(".pausePolling", () => {
         it("clears the timeout and sets the flags", () => {
@@ -89,9 +100,7 @@ describe("lib/ddq-backend-mysql", () => {
         });
     });
     describe(".sendMessage", () => {
-
     });
     describe(".setHeartbeat", () => {
-
     });
 });
