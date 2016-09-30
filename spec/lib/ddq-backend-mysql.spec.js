@@ -8,10 +8,9 @@ describe("lib/ddq-backend-mysql", () => {
             Plugin;
 
         config = {
-            pollingRate: 1000,
-            createMessageCycleLimit: 10,
-            delayMs: 5000,
-            heartbeatCleanupDelay: 5000,
+            createMessageCycleLimitMs: 10,
+            pollDelayMs: 5000,
+            heartbeatCleanupDelayMs: 5000,
             host: "localhost",
             database: "exampleDatabase",
             port: 3333,
@@ -38,10 +37,18 @@ describe("lib/ddq-backend-mysql", () => {
             instance.connect(() => {});
             expect(mysqlMock.createConnection).toHaveBeenCalledWith(jasmine.any(Object));
         });
-        // it("throws an error if there's a problem creating the connection", () => {
-        //     instance.connect(() => {});
-        //     expect(instance.connection).toThrow();
-        // });
+        it("throws an error if there's a problem creating the connection", () => {
+            instance.connect(() => {});
+            instance.connection.connect.andCallFake((callback) => {
+                callback({
+                    Error: "Some Error"
+                });
+            });
+
+            expect(() => {
+                instance.connect(() => {});
+            }).toThrow();
+        });
     });
     describe(".deleteData", () => {
         it("calls the MySQL query", () => {
