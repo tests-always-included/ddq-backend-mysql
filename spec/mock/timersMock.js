@@ -8,5 +8,7 @@ module.exports = () => {
         "clearTimeout"
     ]);
 
+    mock.setTimeout.andReturn(true);
+
     return mock;
 };
