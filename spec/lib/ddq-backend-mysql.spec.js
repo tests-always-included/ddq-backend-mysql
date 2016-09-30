@@ -1,11 +1,11 @@
 "use strict";
 
 describe("lib/ddq-backend-mysql", () => {
-    var instance, mysqlMock;
+    var instance, mysqlMock, timersMock;
 
     beforeEach(() => {
         var config, configValidationMock, crypto, EventEmitterMock,
-            Plugin, timersMock;
+            Plugin;
 
         config = {
             pollingRate: 1000,
@@ -24,9 +24,9 @@ describe("lib/ddq-backend-mysql", () => {
             "validateConfig"
         ]);
         crypto = require("crypto");
-        EventEmitterMock = require("./mock/event-emitter-mock")();
-        mysqlMock = require("./mock/mysql-mock")();
-        timersMock = require("./mock/timersMock")();
+        EventEmitterMock = require("../mock/event-emitter-mock")();
+        mysqlMock = require("../mock/mysql-mock")();
+        timersMock = require("../mock/timersMock")();
 
         Plugin = require("../../lib/ddq-backend-mysql")(config, configValidationMock, crypto, EventEmitterMock, mysqlMock, timersMock);
         instance = new Plugin();
@@ -62,13 +62,31 @@ describe("lib/ddq-backend-mysql", () => {
 
     });
     describe(".pausePolling", () => {
-
+        it("clears the timeout and sets the flags", () => {
+            spyOn(instance, "poll").andCallFake(() => {
+                instance.poller = true;
+                instance.restorer = true;
+                instance.currentlyPolling = true;
+            });
+            instance.poll();
+            instance.pausePolling();
+            expect(instance.poller).toBe(null);
+            expect(instance.restorer).toBe(null);
+            expect(instance.currentlyPolling).toBe(false);
+            expect(timersMock.clearTimeout).toHaveBeenCalled();
+        });
     });
     describe(".poll", () => {
 
     });
     describe(".resumePolling", () => {
-
+        it("sets the flag and calls .poll", () => {
+            expect(instance.currentlyPolling).toBe(false);
+            spyOn(instance, "poll");
+            instance.resumePolling();
+            expect(instance.poll).toHaveBeenCalled();
+            expect(instance.currentlyPolling).toBe(true);
+        });
     });
     describe(".sendMessage", () => {
 
