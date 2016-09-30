@@ -43,7 +43,12 @@ describe("lib/ddq-backend-mysql", () => {
         //     expect(instance.connection).toThrow();
         // });
     });
-    describe(".delete", () => {
+    describe(".deleteData", () => {
+        it("calls the MySQL query", () => {
+            instance.connect(() => {});
+            instance.deleteData(123);
+            expect(instance.connection.query).toHaveBeenCalled();
+        });
     });
     describe(".disconnect", () => {
         it("ends the connection", () => {
@@ -53,7 +58,7 @@ describe("lib/ddq-backend-mysql", () => {
         });
     });
     describe(".getRecord", () => {
-        it("", () => {
+        it("calls the MySQL query", () => {
             instance.connect(() => {});
             instance.getRecord(123, () => {});
             expect(instance.connection.query).toHaveBeenCalled();
@@ -62,24 +67,23 @@ describe("lib/ddq-backend-mysql", () => {
     describe(".listen", () => {
         beforeEach(() => {
             instance.currentlyPolling = false;
-            spyOn(instance, "poll");
+            instance.connect(() => {});
         });
         it("Sets the flag and calls functions", () => {
+            expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
             instance.listen();
             expect(instance.currentlyPolling).toBe(true);
-            expect(instance.poll).toHaveBeenCalled();
-            expect(instance.restorer).not.toBe(null);
+            expect(instance.poller).not.toEqual(false);
+            expect(instance.restorer).not.toEqual(false);
         });
     });
     describe(".pausePolling", () => {
         it("clears the timeout and sets the flags", () => {
-            spyOn(instance, "poll").andCallFake(() => {
-                instance.poller = true;
-                instance.restorer = true;
-                instance.currentlyPolling = true;
-            });
-            instance.poll();
+            instance.poller = true;
+            instance.restorer = true;
+            instance.currentlyPolling = true;
+            instance.listen();
             instance.pausePolling();
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
@@ -87,20 +91,23 @@ describe("lib/ddq-backend-mysql", () => {
             expect(timersMock.clearTimeout).toHaveBeenCalled();
         });
     });
-    describe(".poll", () => {
-
-    });
+    // describe(".poll", () => {
+    //
+    // });
     describe(".resumePolling", () => {
-        it("sets the flag and calls .poll", () => {
-            expect(instance.currentlyPolling).toBe(false);
-            spyOn(instance, "poll");
+        beforeEach(() => {
+            instance.currentlyPolling = false;
+            instance.connect(() => {});
+        });
+        it("Sets the flag and calls functions", () => {
+            expect(instance.poller).toBe(null);
+            expect(instance.restorer).toBe(null);
             instance.resumePolling();
-            expect(instance.poll).toHaveBeenCalled();
             expect(instance.currentlyPolling).toBe(true);
+            expect(instance.poller).not.toEqual(false);
+            expect(instance.restorer).not.toEqual(false);
         });
     });
     describe(".sendMessage", () => {
-    });
-    describe(".setHeartbeat", () => {
     });
 });
