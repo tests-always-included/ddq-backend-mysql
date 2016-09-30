@@ -1,23 +1,20 @@
 "use strict";
 
 module.exports = () => {
-    var mock;
+    var connection, mock;
 
     mock = jasmine.createSpyObj("mysqlMock", [
         "createConnection"
     ]);
 
-    mock.createConnection.andReturn({
-        connect: (callback) => {
+    connection = {
+        connect: jasmine.createSpy("connect").andCallFake((callback) => {
             callback();
-        },
-        end: (callback) => {
-            callback();
-        },
-        query: (sqlCommand, escapedValues, callback) => {
-            callback();
-        }
-    });
+        }),
+        end: jasmine.createSpy("end").andCallFake(() => {}),
+        query: jasmine.createSpy("query").andCallFake(() => {})
+    };
+    mock.createConnection.andReturn(connection);
 
     return mock;
 };
