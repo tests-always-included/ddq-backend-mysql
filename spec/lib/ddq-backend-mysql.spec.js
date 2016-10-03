@@ -147,9 +147,6 @@ describe("lib/ddq-backend-mysql", () => {
             expect(timersMock.clearTimeout).toHaveBeenCalled();
         });
     });
-    // describe(".poll", () => {
-    //
-    // });
     describe(".resumePolling", () => {
         beforeEach(() => {
             instance.currentlyPolling = false;
@@ -165,5 +162,45 @@ describe("lib/ddq-backend-mysql", () => {
         });
     });
     describe(".sendMessage", () => {
+        beforeEach(() => {
+            spyOn(instance, "emit");
+            instance.connect(() => {});
+        });
+        ddescribe("checkRecord()", () => {
+            it("emits an error", () => {
+                instance.connection.query.andCallFake((query, option, callback) => {
+                    callback({
+                        Code: "ER_DUP_ENTRY"
+                    });
+                });
+                instance.sendMessage("Example Message", "Example Topic", () => {});
+            });
+        });
+        describe("trySendMessage()", () => {
+            it("emits an error", () => {
+                instance.connection.query.andCallFake((query, option, callback) => {
+                    callback({
+                        Error: "Some Error"
+                    });
+                });
+                instance.sendMessage("Example Message", "Example Topic", () => {});
+                expect(instance.emit).toHaveBeenCalledWith("error", {
+                    Error: "Some Error"
+                });
+            });
+            it("throws an error", () => {
+                expect(() => {
+                    instance.sendMessage();
+                }).toThrow(Error("Could not send message"));
+            });
+        });
+        describe("writeRecord()", () => {
+            it("emits an error", () => {
+                instance.sendMessage();
+                expect(instance.emit).toHaveBeenCalled("error", {
+                    Error: "Some Error"
+                });
+            });
+        });
     });
 });
