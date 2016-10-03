@@ -31,6 +31,40 @@ describe("lib/ddq-backend-mysql", () => {
         instance = new Plugin();
     });
     describe(".checkNow", () => {
+        beforeEach(() => {
+            spyOn(instance, "emit");
+            instance.connect(() => {});
+        });
+        it("emits an error", () => {
+            instance.connection.query.andCallFake((query, options, callback) => {
+                callback({
+                    Error: "Some Error"
+                });
+            });
+            instance.checkNow();
+            expect(instance.emit).toHaveBeenCalledWith("error", {
+                Error: "Some Error"
+            });
+        });
+        it("emits a wrapper message", () => {
+            instance.connection.query.andCallFake((query, options, callback) => {
+                callback(null, [
+                    {
+                        hash: 12345,
+                        messageBase64: 12345,
+                        topic: "Some Topic"
+                    }
+                ]);
+            });
+            instance.checkNow();
+            expect(instance.emit).toHaveBeenCalledWith("data", {
+                heartbeat: jasmine.any(Function),
+                message: 12345,
+                requeue: jasmine.any(Function),
+                remove: jasmine.any(Function),
+                topic: "Some Topic"
+            });
+        });
     });
     describe(".connect", () => {
         it("creates a MySQL connection", () => {
@@ -48,6 +82,11 @@ describe("lib/ddq-backend-mysql", () => {
             expect(() => {
                 instance.connect(() => {});
             }).toThrow();
+        });
+        it("doesn't utilize connection options if they are falsy", () => {
+            instance.config.database = null;
+
+            instance.connect(() => {});
         });
     });
     describe(".deleteData", () => {
