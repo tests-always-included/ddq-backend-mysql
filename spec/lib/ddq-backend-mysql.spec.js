@@ -51,10 +51,20 @@ describe("lib/ddq-backend-mysql", () => {
         });
     });
     describe(".deleteData", () => {
-        it("calls the MySQL query", () => {
+        it("emits data", () => {
+            spyOn(instance, "emit");
             instance.connect(() => {});
             instance.deleteData(123);
             expect(instance.connection.query).toHaveBeenCalled();
+            expect(instance.emit).toHaveBeenCalledWith("data", jasmine.any(Function));
+        });
+        it("emits an error", () => {
+            spyOn(instance, "emit");
+            instance.connect(() => {});
+            instance.deleteData(321);
+            expect(instance.emit).toHaveBeenCalledWith("error", {
+                Error: "Some Error"
+            });
         });
     });
     describe(".disconnect", () => {
