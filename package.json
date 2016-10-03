@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "istanbul cover jasmine-node --captureExceptions spec/ && codecov && eslint .",
+        "manTest": "node ./bin/manualTestScript",
         "watch": "jasmine-node lib spec --autotest --watch"
     },
     "author": "DDQ Team",

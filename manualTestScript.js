@@ -16,9 +16,10 @@ config = {
     table: "queue",
     topics: ["SomeTopic", "blahblah", "Test Topic"],
     user: "root",
+    // TODO This will break without a valid password
 };
 
-Plugin = require("./ddq-backend-mysql/lib/index")(config);
+Plugin = require("../lib/index")(config);
 
 function manualTest(fn, done) {
     var instance;
@@ -219,4 +220,3 @@ function pollingTest() {
     });
 }
 pollingTest();
-
