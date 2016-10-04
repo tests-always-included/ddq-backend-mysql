@@ -19,16 +19,16 @@ addons:
       - mysql-client-core-5.6
       - mysql-client-5.6
 script:
-    - mysql -u root -v "CREATE DATABASE testQueue;"
-    - mysql -u root -v "CREATE USER 'travis'@'localhost' IDENTIFIED BY
+    - mysql -u root -e -v "CREATE DATABASE testQueue;"
+    - mysql -u root -e -v "CREATE USER 'travis'@'localhost' IDENTIFIED BY
       'travis';"
-    - mysql -u root -v "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
-    - mysql -u root -v "USE testQueue;"
-    - mysql -u root -v "CREATE TABLE queue (hash CHAR(64), PRIMARY
+    - mysql -u root -e -v "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
+    - mysql -u root -e -v "USE testQueue;"
+    - mysql -u root -e -v "CREATE TABLE queue (hash CHAR(64), PRIMARY
       KEY(hash));"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN messageBase64 VARCHAR(120) NOT NULL;"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN requeued BOOLEAN DEFAULT FALSE;"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN heartbeatDeat DATETIME;"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN owner VARCHAR(120);"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN isProcessing BOOLEAN DEFAULT FALSE, INDEX isProcessing(isProcessing);"
-    - mysql -u root -v "ALTER TABLE testQueue ADD COLUMN topics VARCHAR(256);"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN messageBase64 VARCHAR(120) NOT NULL;"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN requeued BOOLEAN DEFAULT FALSE;"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN heartbeatDeat DATETIME;"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN owner VARCHAR(120);"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN isProcessing BOOLEAN DEFAULT FALSE, INDEX isProcessing(isProcessing);"
+    - mysql -u root -e -v "ALTER TABLE testQueue ADD COLUMN topics VARCHAR(256);"
