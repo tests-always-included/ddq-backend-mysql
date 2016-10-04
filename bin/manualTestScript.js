@@ -15,7 +15,7 @@ config = {
     port: 3306,
     table: "queue",
     topics: ["SomeTopic", "blahblah", "Test Topic"],
-    user: "root",
+    user: "root"
     // TODO This will break without a valid password
 };
 
@@ -63,21 +63,6 @@ manualTest((instance, done) => {
         console.log(err);
     } else {
         console.log("sendMessage test passed");
-    }
-});
-
-// getRecord
-manualTest((instance, done) => {
-    instance.getRecord("0ed71051d7ee6ddd3ca15746336f382d1edc58664f9df927d117e0b92277d413", (err) => {
-        console.log("Test Callback");
-        done(err);
-    });
-}, (err) => {
-    if (err) {
-        console.log("getRecord test failed");
-        console.log(err);
-    } else {
-        console.log("getRecord test passed");
     }
 });
 

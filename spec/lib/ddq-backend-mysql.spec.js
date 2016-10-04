@@ -89,35 +89,28 @@ describe("lib/ddq-backend-mysql", () => {
             instance.connect(() => {});
         });
     });
-    describe(".deleteData", () => {
-        it("emits data", () => {
-            spyOn(instance, "emit");
-            instance.connect(() => {});
-            instance.deleteData(123);
-            expect(instance.connection.query).toHaveBeenCalled();
-            expect(instance.emit).toHaveBeenCalledWith("data", jasmine.any(Function));
-        });
-        it("emits an error", () => {
-            spyOn(instance, "emit");
-            instance.connect(() => {});
-            instance.deleteData(321);
-            expect(instance.emit).toHaveBeenCalledWith("error", {
-                Error: "Some Error"
-            });
-        });
-    });
+    // describe(".deleteData", () => {
+    //     it("emits data", () => {
+    //         spyOn(instance, "emit");
+    //         instance.connect(() => {});
+    //         instance.deleteData(123);
+    //         expect(instance.connection.query).toHaveBeenCalled();
+    //         expect(instance.emit).toHaveBeenCalledWith("data", jasmine.any(Function));
+    //     });
+    //     it("emits an error", () => {
+    //         spyOn(instance, "emit");
+    //         instance.connect(() => {});
+    //         instance.deleteData(321);
+    //         expect(instance.emit).toHaveBeenCalledWith("error", {
+    //             Error: "Some Error"
+    //         });
+    //     });
+    // });
     describe(".disconnect", () => {
         it("ends the connection", () => {
             instance.connect(() => {});
             instance.disconnect(() => {});
             expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
-        });
-    });
-    describe(".getRecord", () => {
-        it("calls the MySQL query", () => {
-            instance.connect(() => {});
-            instance.getRecord(123, () => {});
-            expect(instance.connection.query).toHaveBeenCalled();
         });
     });
     describe(".listen", () => {
