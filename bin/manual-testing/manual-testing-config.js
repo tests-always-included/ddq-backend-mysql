@@ -11,10 +11,10 @@ module.exports = () => {
         heartbeatCleanupDelayMs: 1000,
         heartbeatLifetimeSeconds: 5,
         host: "localhost",
-        database: "pluginSandbox",
+        database: "testQueue",
         port: 3306,
         table: "queue",
-        topics: ["SomeTopic", "blahblah", "Test Topic"],
+        topics: ["SomeTopic", "blahblah", "Test Topic", null],
         user: "root"
     };
 
