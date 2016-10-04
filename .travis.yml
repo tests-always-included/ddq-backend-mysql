@@ -1,2 +1,31 @@
+language: node_js
+node_js:
+  - "4.0"
+  - "4"
+  - "5.0"
+  - "5"
+  - "6.0"
+  - "6"
+before_install:
+  - "npm install -g npm@latest"
 services:
   - mysql
+dist: trusty
+sudo: required
+addons:
+  apt:
+    packages:
+      - mysql-server-5.6
+      - mysql-client-core-5.6
+      - mysql-client-5.6
+script:
+    - mysql -e "CREATE DATABASE myapp_test;"
+    - mysql -u root -e "CREATE DATABASE testQueue;"
+    - mysql -u root -e "CREATE USER 'travis'@'localhost' IDENTIFIED BY
+      'travis';"
+    - mysql -u root -e "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
+    - mysql -u travis -e "USE testQueue;"
+    - mysql -u travis -e "CREATE TABLE queue (hash CHAR(64), messageBase64
+      VARCHAR(120) NOT NULL, requeued BOOLEAN DEFAULT FALSE, heartbeatDeat
+      DATETIME, owner VARCHAR(120), isProcessing BOOLEAN DEFAULT FALSE, topics
+      VARCHAR(256), PRIMARY KEY(has) INDEX isProcessing(isProcessing));"
