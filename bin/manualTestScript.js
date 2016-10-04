@@ -122,35 +122,6 @@ function checkNowTest() {
 }
 checkNowTest();
 
-function deleteTest() {
-    var instance;
-
-    instance = new Plugin();
-
-    instance.on("data", (data) => {
-        console.log("DELETE TEST DATA LISTENER");
-        console.log(data);
-    });
-
-    instance.connect((connectErr) => {
-        if (connectErr) {
-            console.log("There was a connection error");
-        }
-
-        console.log("Connection was successfully made");
-        instance.deleteData("0ed71051d7ee6ddd3ca15746336f382d1edc58664f9df927d117e0b92277d413");
-
-        instance.disconnect((err) => {
-            if (err) {
-                console.log("There was a problem disconnecting", err);
-            } else {
-                console.log("Disconnected successfully");
-            }
-        });
-    });
-}
-deleteTest();
-
 // Tests polling, pausing, resuming, and the heartbeat cleanup.
 function pollingTest() {
     var instance;
