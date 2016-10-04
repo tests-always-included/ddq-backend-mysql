@@ -27,4 +27,4 @@ script:
     - mysql -u root -e "CREATE TABLE queue (hash CHAR(64), messageBase64
       VARCHAR(120) NOT NULL, requeued BOOLEAN DEFAULT FALSE, heartbeatDeat
       DATETIME, owner VARCHAR(120), isProcessing BOOLEAN DEFAULT FALSE, topics
-      VARCHAR(256), PRIMARY KEY(has) INDEX isProcessing(isProcessing));"
+      VARCHAR(256), PRIMARY KEY(hash), INDEX isProcessing(isProcessing));"
