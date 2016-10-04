@@ -7,7 +7,6 @@ config = require("./manualTestConfig");
 
 Plugin = require("../../lib/index")(config);
 
-// Tests polling, pausing, resuming, and the heartbeat cleanup.
 function pollingTest() {
     var instance;
 
