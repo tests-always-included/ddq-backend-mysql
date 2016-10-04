@@ -29,4 +29,5 @@ before_script:
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN topics VARCHAR(256);"
 script:
   - node bin/manual-testing/polling-heartbeat-test
+  - node bin/manual-testing/send-message-test
   - node bin/manual-testing/wrapped-messages-tests
