@@ -20,9 +20,6 @@ addons:
       - mysql-client-5.6
 script:
     - mysql -u root -e -v "CREATE DATABASE testQueue;"
-    - mysql -u root -e -v "CREATE USER 'travis'@'localhost' IDENTIFIED BY
-      'travis';"
-    - mysql -u root -e -v "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
     - mysql -u root -e -v "USE testQueue;"
     - mysql -u root -e -v "CREATE TABLE queue (hash CHAR(64), PRIMARY
       KEY(hash));"
