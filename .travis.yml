@@ -27,3 +27,6 @@ before_script:
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN owner VARCHAR(64);"
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN isProcessing BOOLEAN DEFAULT FALSE, INDEX isProcessing(isProcessing);"
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN topics VARCHAR(256);"
+script:
+  - npm run bin/manual-testing/polling-heartbeat-test
+  - npm run bin/manual-testing/wrapped-messages-tests
