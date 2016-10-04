@@ -19,12 +19,12 @@ addons:
       - mysql-client-core-5.6
       - mysql-client-5.6
 script:
-    - mysql -u root -e -v -v -v "CREATE DATABASE testQueue;"
-    - mysql -u root -e -v -v -v "CREATE USER 'travis'@'localhost' IDENTIFIED BY
-      'travis';"
-    - mysql -u root -e -v -v -v "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
-    - mysql -u root -e -v -v -v "USE testQueue;"
-    - mysql -u root -e -v -v -v "CREATE TABLE queue (hash CHAR(64), messageBase64
+    - mysql -u root -e -v "CREATE DATABASE testQueue;"
+    # - mysql -u root -e -v "CREATE USER 'travis'@'localhost' IDENTIFIED BY
+    #   'travis';"
+    # - mysql -u root -e -v "GRANT ALL ON testQueue.* TO 'travis'@'localhost';"
+    - mysql -u root -e -v "USE testQueue;"
+    - mysql -u root -e -v "CREATE TABLE queue (hash CHAR(64), messageBase64
       VARCHAR(120) NOT NULL, requeued BOOLEAN DEFAULT FALSE, heartbeatDeat
       DATETIME, owner VARCHAR(120), isProcessing BOOLEAN DEFAULT FALSE, topics
       VARCHAR(256), PRIMARY KEY(hash), INDEX isProcessing(isProcessing));"
