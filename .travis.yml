@@ -19,9 +19,8 @@ addons:
       - mysql-client-core-5.6
       - mysql-client-5.6
 before_script:
-    - mysql -u root -e -v "CREATE DATABASE testQueue;"
-    - mysql -u root -e -v "USE testQueue;"
-    - mysql -u root -e -v "CREATE TABLE queue (hash CHAR(64), PRIMARY
+    - mysql -u root -e "CREATE DATABASE testQueue;"
+    - mysql -u root -e "USE testQueue CREATE TABLE queue (hash CHAR(64), PRIMARY
       KEY(hash));"
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN messageBase64 VARCHAR(120) NOT NULL;"
     - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN requeued BOOLEAN DEFAULT FALSE;"
