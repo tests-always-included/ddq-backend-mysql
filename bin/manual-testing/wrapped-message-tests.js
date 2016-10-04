@@ -4,56 +4,44 @@
 var config, Plugin;
 
 config = require("./manualTestConfig");
-
 Plugin = require("../../lib/index")(config);
 
-function manualTest(fn, done) {
+
+function cleanup() {
     var instance;
 
     instance = new Plugin();
 
-    instance.connect((connectErr) => {
-        if (connectErr) {
-            console.log("There was a connection error");
-            done(connectErr);
+    instance.connection((connectionErr) => {
+        if (connectionErr) {
+            throw new Error("There was a problem connecting during cleanup", connectionErr);
+        } else {
+            instance.connection.query("DELETE FROM ??;",
+            [config.table],
+            (wipeErr, data) => {
+                if (wipeErr) {
+                    throw new Error("There was a problem wiping the database",
+                        wipeErr);
+                }
 
-            return;
-        }
-
-        console.log("Connection was successfully made");
-        fn(instance, (testErr) => {
-            if (testErr) {
-                done(testErr);
-
-                return;
-            }
-
-            instance.disconnect((disconnectErr) => {
-                done(disconnectErr);
-
-                return;
+                console.log("Cleanup was successful");
+                console.log(data);
             });
-        });
+        }
+        setTimeout(() => {
+            instance.disconnect((err) => {
+                if (err) {
+                    console.log("There was a problem disconnecting", err);
+                } else {
+                    console.log("Disconnected successfully");
+                }
+            });
+        }, 2000);
     });
 }
 
-// sendMessage
-manualTest((instance, done) => {
-    instance.sendMessage("Test Message", "Test Topic", (err) => {
-        console.log("Test Callback");
-        done(err);
-    });
-}, (err) => {
-    if (err) {
-        console.log("sendMessage test failed");
-        console.log(err);
-    } else {
-        console.log("sendMessage test passed");
-    }
-});
 
-// Tests checkNow and all of the methods that are within wrapped message.
-function checkNowTest() {
+function wrappedMessageTest(fn) {
     var instance;
 
     instance = new Plugin();
@@ -61,32 +49,21 @@ function checkNowTest() {
     instance.on("data", (data) => {
         console.log("CheckNow data listener activated");
         console.log("data", data);
-        data.requeue((err, requeueData) => {
+        data[fn]((err, fnData) => {
             if (err) {
-                console.log("There was an error while running requeue");
+                console.log("There was an error");
                 console.log(err);
             } else {
-                console.log("Requeue was successful");
-                console.log("Requeue Data", requeueData);
+                console.log("Function was successful");
+                console.log("Data:", fnData);
             }
         });
-        data.heartbeat((err, heartbeatData) => {
-            if (err) {
-                console.log("There was an error while running heartbeat");
-                console.log(err);
-            } else {
-                console.log("Heartbeat was successful");
-                console.log("Heartbeat Data", heartbeatData);
-            }
-        });
-        data.remove();
     });
 
     instance.on("error", (err) => {
         console.log("CheckNow error listener activated");
         console.log(err);
     });
-
     instance.connect((connectErr) => {
         if (connectErr) {
             console.log("There was a connection error");
@@ -106,4 +83,39 @@ function checkNowTest() {
         }, 2000);
     });
 }
-checkNowTest();
+
+function heartbeatPrep() {
+    var instance;
+
+    instance = new Plugin();
+}
+
+
+function requeuePrep() {
+    var instance;
+
+    instance = new Plugin();
+}
+
+
+function removePrep() {
+    var instance;
+
+    instance = new Plugin();
+}
+
+
+// TODO Add record with hash equal to a specific ID, isProcessing is true, and
+// the owner is the same as the owner defined in the config
+heartbeatPrep();
+wrappedMessageTest("heartbeat");
+cleanup();
+requeuePrep();
+// TODO Add record with hash equal to a specific ID
+wrappedMessageTest("requeue");
+cleanup();
+removePrep();
+// TODO Add record with specific hash, requeued is false
+wrappedMessageTest("remove");
+cleanup();
+
