@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 
 var config, Plugin;
@@ -7,6 +6,10 @@ config = require("./manualTestConfig");
 
 Plugin = require("../../lib/index")(config);
 
+/**
+ * Manual test for connect, listen, pausePolling, resumePolling, and disconnect,
+ * in that order.
+ */
 function pollingTest() {
     var instance;
 
@@ -19,6 +22,7 @@ function pollingTest() {
     instance.connect((connectErr) => {
         if (connectErr) {
             console.log("There was a connection error");
+            throw new Error(connectErr);
         }
 
         console.log("Connection was successfully made");
@@ -51,7 +55,8 @@ function pollingTest() {
         setTimeout(() => {
             instance.disconnect((err) => {
                 if (err) {
-                    console.log("There was a problem disconnecting", err);
+                    console.log("There was a problem disconnecting");
+                    throw new Error(err);
                 } else {
                     console.log("Disconnected successfully");
                 }

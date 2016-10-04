@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 
 var config, Plugin;
@@ -7,6 +6,12 @@ config = require("./manualTestConfig");
 
 Plugin = require("../../lib/index")(config);
 
+/**
+ * Wrapper for tests. In this case, only sendMessage...
+ *
+ * @param {Function} fn
+ * @param {Function} done
+ */
 function manualTest(fn, done) {
     var instance;
 
@@ -46,7 +51,7 @@ manualTest((instance, done) => {
 }, (err) => {
     if (err) {
         console.log("sendMessage test failed");
-        console.log(err);
+        throw new Error(err);
     } else {
         console.log("sendMessage test passed");
     }

@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 
 var config, Plugin;
@@ -6,22 +5,26 @@ var config, Plugin;
 config = require("./manualTestConfig");
 Plugin = require("../../lib/index")(config);
 
-
+/**
+ * Instantiates a plugin and uses its connection to clear all records from the
+ * database.
+ */
 function cleanup() {
     var instance;
 
     instance = new Plugin();
 
-    instance.connection((connectionErr) => {
-        if (connectionErr) {
-            throw new Error("There was a problem connecting during cleanup", connectionErr);
+    instance.connection((connectErr) => {
+        if (connectErr) {
+            console.log("There was a problem connection during cleanup");
+            throw new Error(connectErr);
         } else {
             instance.connection.query("DELETE FROM ??;",
             [config.table],
             (wipeErr, data) => {
                 if (wipeErr) {
-                    throw new Error("There was a problem wiping the database",
-                        wipeErr);
+                    console.log("There was a problem wiping the database");
+                    throw new Error(wipeErr);
                 }
 
                 console.log("Cleanup was successful");
@@ -41,6 +44,12 @@ function cleanup() {
 }
 
 
+/**
+ * Wrapper for testing the individual methods that are received from a DDQ
+ * Plugin wrapped message.
+ *
+ * @param {Function} fn
+ */
 function wrappedMessageTest(fn) {
     var instance;
 
@@ -52,7 +61,7 @@ function wrappedMessageTest(fn) {
         data[fn]((err, fnData) => {
             if (err) {
                 console.log("There was an error");
-                console.log(err);
+                throw new Error(err);
             } else {
                 console.log("Function was successful");
                 console.log("Data:", fnData);
@@ -62,11 +71,12 @@ function wrappedMessageTest(fn) {
 
     instance.on("error", (err) => {
         console.log("CheckNow error listener activated");
-        console.log(err);
+        throw new Error(err);
     });
     instance.connect((connectErr) => {
         if (connectErr) {
             console.log("There was a connection error");
+            throw new Error(connectErr);
         }
 
         console.log("Connection was successfully made");
@@ -75,7 +85,8 @@ function wrappedMessageTest(fn) {
         setTimeout(() => {
             instance.disconnect((err) => {
                 if (err) {
-                    console.log("There was a problem disconnecting", err);
+                    console.log("There was a problem disconnecting");
+                    throw new Error(err);
                 } else {
                     console.log("Disconnected successfully");
                 }
@@ -84,20 +95,32 @@ function wrappedMessageTest(fn) {
     });
 }
 
+
+/**
+ * Creates a record that has a hash, an isProcessing value of true, and an owner
+ * value that is the same as that set to the config and adds that record to the
+ * database. In short, it is a match for the conditions that heartbeat searches
+ * for.
+ */
 function heartbeatPrep() {
     var instance;
 
     instance = new Plugin();
 }
 
-
+/**
+ * Creates a record and adds it to the database.
+ */
 function requeuePrep() {
     var instance;
 
     instance = new Plugin();
 }
 
-
+/**
+ * Creates a record that has a hash and a requeued value set to false and adds
+ * it to the database.
+ */
 function removePrep() {
     var instance;
 
@@ -105,17 +128,13 @@ function removePrep() {
 }
 
 
-// TODO Add record with hash equal to a specific ID, isProcessing is true, and
-// the owner is the same as the owner defined in the config
 heartbeatPrep();
 wrappedMessageTest("heartbeat");
 cleanup();
 requeuePrep();
-// TODO Add record with hash equal to a specific ID
 wrappedMessageTest("requeue");
 cleanup();
 removePrep();
-// TODO Add record with specific hash, requeued is false
 wrappedMessageTest("remove");
 cleanup();
 
