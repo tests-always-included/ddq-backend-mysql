@@ -30,6 +30,7 @@ describe("config-validation", () => {
                 createMessageCycleLimitMs: 1000,
                 pollDelayMs: 1000,
                 heartbeatCleanupDelayMs: 50000,
+                heartbeatLifetimeSeconds: 5,
                 host: "localhost",
                 table: "exampleTable"
             };
