@@ -159,7 +159,7 @@ describe("lib/ddq-backend-mysql", () => {
             spyOn(instance, "emit");
             instance.connect(() => {});
         });
-        ddescribe("checkRecord()", () => {
+        describe("checkRecord()", () => {
             it("emits an error", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({

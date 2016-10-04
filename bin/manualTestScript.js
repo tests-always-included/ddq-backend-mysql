@@ -16,7 +16,6 @@ config = {
     table: "queue",
     topics: ["SomeTopic", "blahblah", "Test Topic"],
     user: "root"
-    // TODO This will break without a valid password
 };
 
 Plugin = require("../lib/index")(config);
