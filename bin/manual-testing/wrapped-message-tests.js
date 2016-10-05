@@ -116,10 +116,10 @@ function wrappedMessageTest(fn, query) {
 }
 
 
-wrappedMessageTest("heartbeat", "INSERT INTO instance.config.table SET hash = data.recordId, isProcessing = true, owner = instance.owner;");
+wrappedMessageTest("heartbeat", "USE instance.config.database INSERT INTO instance.config.table SET hash = data.recordId, isProcessing = true, owner = instance.owner;");
 cleanup();
-wrappedMessageTest("requeue", "INSERT INTO instance.config.table SET hash = data.recordId;");
+wrappedMessageTest("requeue", "USE instance.config.database INSERT INTO instance.config.table SET hash = data.recordId;");
 cleanup();
-wrappedMessageTest("remove", "INSERT INTO instance.config.table SET hash = data.recordId, requeued = false;");
+wrappedMessageTest("remove", "USE instance.config.database INSERT INTO instance.config.table SET hash = data.recordId, requeued = false;");
 cleanup();
 
