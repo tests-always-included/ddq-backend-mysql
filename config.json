@@ -1,0 +1,12 @@
+{
+    "createMessageCycleLimit": 10,
+    "heartbeatCleanupDelay": 60000,
+    "host": "localhost",
+    "ip": "0.0.0.0",
+    "name": null,
+    "password": null,
+    "port": 3333,
+    "table": null,
+    "topics": null,
+    "user": null
+}
