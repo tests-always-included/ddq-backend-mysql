@@ -21,12 +21,12 @@ addons:
 before_script:
     - mysql -u root -e "CREATE DATABASE testQueue;"
     - mysql -u root -e "USE testQueue CREATE TABLE queue (hash CHAR(64), PRIMARY KEY(hash));"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN messageBase64 VARCHAR(120) NOT NULL;"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN requeued BOOLEAN DEFAULT FALSE;"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN heartbeatDeat DATETIME;"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN owner VARCHAR(64);"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN isProcessing BOOLEAN DEFAULT FALSE, INDEX isProcessing(isProcessing);"
-    - mysql -u root -e "USE testQueue ALTER TABLE testQueue ADD COLUMN topics VARCHAR(256);"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN messageBase64 VARCHAR(120) NOT NULL;"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN requeued BOOLEAN DEFAULT FALSE;"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN heartbeatDeat DATETIME;"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN owner VARCHAR(64);"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN isProcessing BOOLEAN DEFAULT FALSE, INDEX isProcessing(isProcessing);"
+    - mysql -u root -e "USE testQueue ALTER TABLE queue ADD COLUMN topics VARCHAR(256);"
 script:
   - node bin/manual-testing/polling-heartbeat-test
   - node bin/manual-testing/send-message-test
