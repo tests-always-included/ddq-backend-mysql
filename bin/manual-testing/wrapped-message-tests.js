@@ -34,7 +34,7 @@ function cleanup() {
 
     instance = new Plugin();
 
-    instance.connection((connectErr) => {
+    instance.connect((connectErr) => {
         if (connectErr) {
             console.log("There was a problem connection during cleanup");
             throw new Error(connectErr);
