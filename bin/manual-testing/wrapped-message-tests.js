@@ -2,7 +2,7 @@
 
 var config, Plugin;
 
-config = require("./manualTestConfig");
+config = require("./manual-testing-config");
 Plugin = require("../../lib/index")(config);
 
 
