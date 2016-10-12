@@ -1,0 +1,8 @@
+*.swp
+*.swo
+
+# Generated
+/coverage/
+/node_modules/
+npm-debug.log
+encryption.key
