@@ -16,10 +16,9 @@ describe("lib/config-validation", () => {
         });
         it("throws an error if any of the configKeys are missing", () => {
             config = {
-                createMessageCycleLimitMs: 1000,
-                pollDelayMs: 1000,
-                heartbeatCleanupDelay: 50000,
-                host: "localhost"
+                createMessageCycleLimit: 1000,
+                pollingDelayMs: 1000,
+                heartbeatCleanupDelayMs: 50000
             };
             expect(() => {
                 configValidation.validateConfig(config);
@@ -27,11 +26,10 @@ describe("lib/config-validation", () => {
         });
         it("doesn't throw when given a valid config", () => {
             config = {
-                createMessageCycleLimitMs: 1000,
-                pollDelayMs: 1000,
+                createMessageCycleLimit: 1000,
+                pollingDelayMs: 1000,
                 heartbeatCleanupDelayMs: 50000,
                 heartbeatLifetimeSeconds: 5,
-                host: "localhost",
                 table: "exampleTable"
             };
             expect(() => {

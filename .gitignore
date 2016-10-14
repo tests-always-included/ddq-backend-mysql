@@ -1,5 +1,25 @@
-*.swp
-*.swo
+# OS-specific
+.DSStore
+._*
+.Trash*
+$*
+
+# Backup Files
+*.sw[g-p]
+*.bak
+*~
+*#
+
+# IDEs
+*.as3proj
+.buildpath
+.c9revisions/
+.cproject
+.project
+.idea/
+.settings
+.metadata/
+nbproject/
 
 # Generated
 /coverage/

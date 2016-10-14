@@ -8,7 +8,7 @@ describe("lib/ddq-backend-mysql", () => {
 
         config = {
             createMessageCycleLimitMs: 10,
-            pollDelayMs: 1000,
+            pollingDelayMs: 1000,
             heartbeatCleanupDelayMs: 5000,
             host: "localhost",
             database: "exampleDatabase",
@@ -31,10 +31,10 @@ describe("lib/ddq-backend-mysql", () => {
         Plugin = require("../../lib/ddq-backend-mysql")(config, configValidationMock, crypto, EventEmitter, mysqlMock, timersMock);
         instance = new Plugin();
         instance.connect(() => {});
+        spyOn(instance, "emit");
     });
     describe(".checkNow", () => {
         beforeEach(() => {
-            spyOn(instance, "emit");
         });
         it("emits an error", () => {
             instance.connection.query.andCallFake((query, options, callback) => {
@@ -78,11 +78,11 @@ describe("lib/ddq-backend-mysql", () => {
                     Error: "Some Error"
                 });
             });
-
             expect(() => {
                 instance.connect(() => {});
             }).toThrow();
         });
+
         // This test is a bit redundant, as lib/configValidation should throw an
         // error if a connection option is falsy. This provides branch coverage,
         // though.
@@ -160,9 +160,7 @@ describe("lib/ddq-backend-mysql", () => {
     });
     describe(".sendMessage", () => {
         beforeEach(() => {
-            spyOn(console, "error");
             spyOn(console, "log");
-            spyOn(instance, "emit");
         });
         describe("trySendMessage()", () => {
             it("emits an error", () => {
@@ -183,7 +181,6 @@ describe("lib/ddq-backend-mysql", () => {
                     });
                 });
                 instance.sendMessage("Example Message", "Example Topic", () => {});
-                expect(console.error).toHaveBeenCalledWith("Message already exists.");
                 expect(instance.emit.callCount).toBe(1);
             });
             it("calls the callback on success", () => {
@@ -193,8 +190,6 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.sendMessage("Example Message", "Example Topic", () => {
                     console.log("Callback was called.");
                 });
-                expect(console.log).toHaveBeenCalledWith("Message was sent successfully.");
-                expect(console.log).toHaveBeenCalledWith("Callback was called.");
             });
             it("throws an error", () => {
                 instance.config.createMessageCycleLimitMs = 0;
@@ -230,7 +225,6 @@ describe("lib/ddq-backend-mysql", () => {
                     }
                 });
                 instance.sendMessage("Example Message", "Example Topic", () => {});
-                expect(console.error).toHaveBeenCalledWith("Could not update record because it does not exist.");
             });
             it("calls the callback on success", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
@@ -245,14 +239,13 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.sendMessage("Example Message", "Example Topic", () => {
                     console.log("Callback was called.");
                 });
-                expect(console.log).toHaveBeenCalledWith("Callback was called.");
             });
         });
     });
     describe("wrapped message functions:", () => {
         beforeEach(() => {
             spyOn(console, "error");
-            spyOn(instance, "emit").andCallThrough();
+            instance.emit.andCallThrough();
             instance.connection.query.andCallFake((query, options, callback) => {
                 callback(null, [
                     {
@@ -291,7 +284,6 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.heartbeat(() => {});
                     expect(instance.connection.query.callCount).toBe(2);
-                    expect(console.error).toHaveBeenCalled();
                     done();
                 });
                 instance.checkNow();
@@ -312,7 +304,6 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove();
                     expect(instance.connection.query.callCount).toBe(2);
-                    expect(console.error).not.toHaveBeenCalled();
                     done();
                 });
                 instance.checkNow();
@@ -337,8 +328,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove();
                     expect(instance.connection.query.callCount).toBe(3);
-                    expect(console.error.callCount).toBe(2);
-                    expect(instance.emit).toHaveBeenCalled();
+                    expect(instance.emit.callCount).toBe(2);
                     done();
                 });
                 instance.checkNow();
@@ -347,8 +337,7 @@ describe("lib/ddq-backend-mysql", () => {
     });
     describe(".restore", () => {
         beforeEach(() => {
-            instance.config.pollDelayMs = 0;
-            spyOn(instance, "emit");
+            instance.config.pollingDelayMs = 0;
             timersMock.setTimeout.andCallFake((callback, delayMs) => {
                 if (delayMs === 0) {
                     return;

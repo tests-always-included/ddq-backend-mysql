@@ -3,7 +3,7 @@
 var config, Plugin;
 
 config = require("./manual-testing-config");
-Plugin = require("../../lib/index")(config);
+Plugin = require("..")(config);
 
 
 /**
@@ -15,14 +15,18 @@ Plugin = require("../../lib/index")(config);
  */
 function cleanup(instance, cb) {
     instance.connection.query("DELETE FROM ??;",
-        [instance.config.table],
+        [
+            instance.config.table
+        ],
         (wipeErr, data) => {
             if (wipeErr) {
-                console.log("There was a problem wiping the database");
-                throw new Error(wipeErr);
+                console.error("There was a problem wiping the database");
+                console.error(wipeErr);
+                process.exitCode = 1;
             }
 
             console.log("Cleanup was successful");
+
             // This should be 0 in the case of remove
             console.log("Affected Rows", data.affectedRows);
             cb(instance);
@@ -37,16 +41,16 @@ function cleanup(instance, cb) {
  * @param {ddqPlugin~instance} instance
  */
 function handleDisconnect(instance) {
-    setTimeout(() => {
-        instance.disconnect((err) => {
-            if (err) {
-                console.log("There was a problem disconnecting");
-                throw new Error(err);
-            } else {
-                console.log("Disconnected successfully");
-            }
-        });
-    }, 2000);
+    instance.disconnect((err) => {
+        if (err) {
+            console.error("There was a problem disconnecting");
+            console.error(err);
+            process.exitCode = 1;
+            process.exit();
+        } else {
+            console.log("Disconnected successfully");
+        }
+    });
 }
 
 
@@ -63,45 +67,51 @@ function wrappedMessageTest(fn, query) {
 
     instance.on("data", (data) => {
         console.log("CheckNow data listener activated");
+
         // Undefined data for heartbeat and remove is expected.
         data[fn]((err, fnData) => {
             if (err) {
-                console.log(`There was an error while running ${fn}`);
-                throw new Error(err);
+                console.error(`There was an error while running ${fn}`);
+                console.error(err);
             } else if (fnData && fnData.affectedRows === 0) {
-                throw new Error(`Zero rows affected during ${fn}`);
+                console.error(`Zero rows affected during ${fn}`);
+                process.exitCode = 1;
             }
 
             console.log(`${fn} was successful`);
             console.log("Data:", fnData);
-        });
-        setTimeout(() => {
             cleanup(instance, handleDisconnect);
-        }, 3000);
+        });
     });
 
     instance.on("error", (err) => {
-        console.log("CheckNow error listener activated");
-        throw new Error(err);
+        console.error("CheckNow error listener activated");
+        console.error(err);
+        process.exitCode = 1;
     });
-    instance.connect(() => {});
-    setTimeout(() => {
+    instance.connect((err) => {
+        if (err) {
+            console.error(err);
+            process.exitCode = 1;
+        }
+
         instance.connection.query(query,
-            [instance.config.table, instance.owner],
+            [
+                instance.config.table,
+                instance.owner
+            ],
             (checkNowPrepErr, checkNowPrepData) => {
                 if (checkNowPrepErr) {
-                    console.log("There was an error prepping checkNow",
-                        checkNowPrepErr);
-                    throw new Error(checkNowPrepErr);
+                    console.error("There was an error prepping checkNow", checkNowPrepErr);
+                    console.error(checkNowPrepErr);
+                    process.exitCode = 1;
                 }
 
                 console.log("CheckNow prep was successful", checkNowPrepData);
+                instance.checkNow();
             }
         );
-    }, 2000);
-    setTimeout(() => {
-        instance.checkNow();
-    }, 4000);
+    });
 }
 
 

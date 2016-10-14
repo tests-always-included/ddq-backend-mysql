@@ -2,7 +2,7 @@
     "name": "ddq-mysql",
     "version": "1.0.0",
     "description": "A backend plugin that DeDuplicated Queue (DDQ) can use to communicate with a MySQL database",
-    "main": "index.js",
+    "main": "./lib/index.js",
     "scripts": {
         "test": "istanbul cover jasmine-node --captureExceptions spec/ && codecov && eslint .",
         "watch": "jasmine-node lib spec --autotest --watch"
@@ -10,15 +10,16 @@
     "author": "DDQ Team",
     "contributors": [
         {
-            "name": "Chris Tetreault",
-            "url": "https://github.com/AbsentSemicolon"
-        },
-        {
             "name": "Lucas Nagle",
             "url": "https://github.com/lnagle93"
+        },
+        {
+            "name": "Chris Tetreault",
+            "url": "https://github.com/AbsentSemicolon"
         }
     ],
     "keywords": [
+        "ddq",
         "mysql",
         "queue"
     ],

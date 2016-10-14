@@ -3,11 +3,12 @@
 var config, Plugin;
 
 config = require("./manual-testing-config");
-
-Plugin = require("../../lib/index")(config);
+Plugin = require("..")(config);
 
 /**
- * Wrapper for tests. In this case, only sendMessage.
+ * Instantiate a Plugin and call the passed function after establishing a
+ * connection. Call the done callback on any returned values and disconnect on
+ * success.
  *
  * @param {Function} fn
  * @param {Function} done
@@ -16,7 +17,6 @@ function manualTest(fn, done) {
     var instance;
 
     instance = new Plugin();
-
     instance.connect((connectErr) => {
         if (connectErr) {
             console.log("There was a connection error");
@@ -33,21 +33,13 @@ function manualTest(fn, done) {
                 return;
             }
 
-            instance.disconnect((disconnectErr) => {
-                done(disconnectErr);
-
-                return;
-            });
+            instance.disconnect(done);
         });
     });
 }
 
-// .sendMessage
 manualTest((instance, done) => {
-    instance.sendMessage("Test Message", "Test Topic", (err) => {
-        console.log("Test Callback");
-        done(err);
-    });
+    instance.sendMessage("Test Message", "Test Topic", done);
 }, (err) => {
     if (err) {
         console.log("sendMessage test failed");
