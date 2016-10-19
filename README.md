@@ -10,7 +10,7 @@ DeDuplicated Queue MySQL Plugin
 About
 -----
 
-A MySQL plugin for the DeDuplicated Queue (DDQ) module. The DDQ module and a whole host of documentation (including installation instructions) can be found here: https://github.com/tests-always-included/ddq
+A MySQL plugin for the [DeDuplicated Queue (DDQ)](https://www.npmjs.com/package/ddq) module.
 
 
 Configuration

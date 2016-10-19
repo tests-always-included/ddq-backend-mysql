@@ -20,6 +20,7 @@
     ],
     "keywords": [
         "ddq",
+        "deduplicated queue",
         "mysql",
         "queue"
     ],
