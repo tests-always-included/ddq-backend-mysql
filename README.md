@@ -22,25 +22,25 @@ Here's an example of a DDQ config that would work with this plugin:
 
 
     {
-        backend: "MySQL"
-        backendConfig: {
-            database: "exampleDatabase",
-            heartbeatCleanupDelayMs: 3000
-            heartbeatLifetimeSeconds: 3,
-            host: "localhost",
-            password: "examplePassword",
-            pollingDelayMs: 5000,
-            port: 3306,
-            table: 'exampleTable',
-            topics: [
+        "backend": "MySQL"
+        "backendConfig": {
+            "database": "exampleDatabase",
+            "heartbeatCleanupDelayMs": 3000
+            "heartbeatLifetimeSeconds": 3,
+            "host": "localhost",
+            "password": "examplePassword",
+            "pollingDelayMs": 5000,
+            "port": 3306,
+            "table": "exampleTable",
+            "topics": [
                 "topic1",
                 "topic2",
                 null
             ],
-            user: "exampleUser",
+            "user": "exampleUser",
         },
-        heartbeatDelayMs: 1000,
-        createMessageCycleLimit: 10
+        "heartbeatDelayMs": 1000,
+        "createMessageCycleLimit": 10
     }
 
 

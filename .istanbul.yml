@@ -2,5 +2,4 @@ instrumentation:
     excludes:
         - spec/**/*.js
         - lib/index.js
-        - bin/manual-testing/*
     include-all-sources: true
