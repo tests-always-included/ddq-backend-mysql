@@ -7,7 +7,7 @@ describe("lib/config-validation", () => {
         configValidation = require("../../lib/config-validation.js")();
         spyOn(configValidation, "validateConfig").andCallThrough();
     });
-    describe(".validateConfig", () => {
+    describe(".validateConfig()", () => {
         describe("topic handling:", () => {
             it("throws an error if topics is not an array, string or null", () => {
                 config = {
