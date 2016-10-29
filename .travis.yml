@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "4.0"
+  - "4"
+  - "5.0"
+  - "5"
+  - "6.0"
+  - "6"
+before_install:
+  - "npm install -g npm@latest"
+services:
+    - mysql
+before_script:
+    - bash node_modules/ddq/script/mysql-commands.sh
+script:
+    - node node_modules/ddq/script/wrapped-message-tests mysql
+    - node node_modules/ddq/script/send-message-test mysql
+    - node node_modules/ddq/script/polling-heartbeat-test mysql
