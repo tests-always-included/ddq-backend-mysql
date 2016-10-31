@@ -57,27 +57,27 @@ describe("lib/ddq-backend-mysql", () => {
             expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
         });
     });
-    describe(".listen()", () => {
+    describe(".startstartListeninging()", () => {
         it("sets the flags and calls functions", () => {
             timersMock.setTimeout.andReturn(true);
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
-            instance.listen();
+            instance.startListening();
             expect(instance.currentlyPolling).toBe(true);
             expect(instance.poller).not.toEqual(false);
             expect(instance.restorer).not.toEqual(false);
             expect(timersMock.setTimeout).toHaveBeenCalled();
         });
     });
-    describe(".pausePolling()", () => {
+    describe(".stopPolling()", () => {
         it("clears the timeouts and sets the flags", () => {
-            spyOn(instance, "listen");
+            spyOn(instance, "startListening");
             instance.poller = true;
             instance.restorer = true;
             instance.currentlyPolling = true;
             instance.currentlyRestoring = true;
-            instance.listen();
-            instance.pausePolling();
+            instance.startListening();
+            instance.stopListening();
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
             expect(instance.currentlyPolling).toBe(false);
@@ -85,7 +85,7 @@ describe("lib/ddq-backend-mysql", () => {
             expect(timersMock.clearTimeout).toHaveBeenCalled();
         });
         it("does nothing if the plugin isn't already polling", () => {
-            instance.pausePolling();
+            instance.stopListening();
             expect(timersMock.clearTimeout).not.toHaveBeenCalled();
         });
     });
@@ -111,7 +111,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.emit).not.toHaveBeenCalledWith("error", {});
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("emits data", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -134,7 +134,7 @@ describe("lib/ddq-backend-mysql", () => {
                     });
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("stops polling if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -152,20 +152,8 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(timersMock.setTimeout.callCount).toBe(2);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
-        });
-    });
-    describe(".resumePolling()", () => {
-        it("sets the flag and calls functions", () => {
-            timersMock.setTimeout.andReturn(true);
-            expect(instance.poller).toBe(null);
-            expect(instance.restorer).toBe(null);
-            instance.resumePolling();
-            expect(instance.currentlyPolling).toBe(true);
-            expect(instance.poller).not.toEqual(false);
-            expect(instance.restorer).not.toEqual(false);
-            expect(timersMock.setTimeout).toHaveBeenCalled();
         });
     });
     describe(".sendMessage()", () => {
@@ -275,7 +263,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.connection.query.callCount).toBe(2);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
         describe(".requeue()", () => {
@@ -285,7 +273,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.connection.query.callCount).toBe(2);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
         describe(".remove()", () => {
@@ -295,7 +283,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.connection.query.callCount).toBe(2);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("will call requeue on error", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -321,7 +309,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
     });
@@ -349,7 +337,7 @@ describe("lib/ddq-backend-mysql", () => {
                     });
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("doesn't emit on success", (done) => {
                 timersMock.setTimeout.andCallFake((callback) => {
@@ -363,7 +351,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.connection.query.andCallFake((query, queryOptions, callback) => {
                     callback(null);
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("stops restoring if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -376,7 +364,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(timersMock.setTimeout.callCount).toBe(1);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
     });
