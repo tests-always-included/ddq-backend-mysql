@@ -1,6 +1,6 @@
 {
     "name": "ddq-mysql",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "A backend plugin that DeDuplicated Queue (DDQ) can use to communicate with a MySQL database",
     "main": "./lib/index.js",
     "scripts": {
@@ -31,7 +31,7 @@
     },
     "devDependencies": {
         "codecov": "^1.0.1",
-        "ddq": "^1.0.0",
+        "ddq": "^1.1.0",
         "eslint": "^2.10.2",
         "istanbul": "^0.4.5",
         "jasmine-node": "^1.14.5",
