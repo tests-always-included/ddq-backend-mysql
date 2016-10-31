@@ -57,7 +57,7 @@ describe("lib/ddq-backend-mysql", () => {
             expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
         });
     });
-    describe(".startstartListeninging()", () => {
+    describe(".startListeninging()", () => {
         it("sets the flags and calls functions", () => {
             timersMock.setTimeout.andReturn(true);
             expect(instance.poller).toBe(null);
@@ -69,7 +69,7 @@ describe("lib/ddq-backend-mysql", () => {
             expect(timersMock.setTimeout).toHaveBeenCalled();
         });
     });
-    describe(".stopPolling()", () => {
+    describe(".stopListening()", () => {
         it("clears the timeouts and sets the flags", () => {
             spyOn(instance, "startListening");
             instance.poller = true;
@@ -84,9 +84,16 @@ describe("lib/ddq-backend-mysql", () => {
             expect(instance.currentlyRestoring).toBe(false);
             expect(timersMock.clearTimeout).toHaveBeenCalled();
         });
-        it("does nothing if the plugin isn't already polling", () => {
+        it("does nothing if the plugin isn't already listening", () => {
             instance.stopListening();
             expect(timersMock.clearTimeout).not.toHaveBeenCalled();
+        });
+        it("calls the callback if one is passed", () => {
+            var callback;
+
+            callback = jasmine.createSpy();
+            instance.stopListening(callback);
+            expect(callback).toHaveBeenCalled();
         });
     });
     describe(".poll()", () => {
@@ -136,7 +143,7 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
-            it("stops polling if the flag isn't set", (done) => {
+            it("stops listening if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
                     instance.currentlyPolling = false;
                     callback(null, [
