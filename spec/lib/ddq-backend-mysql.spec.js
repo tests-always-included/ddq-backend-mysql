@@ -57,7 +57,7 @@ describe("lib/ddq-backend-mysql", () => {
             expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
         });
     });
-    describe(".startListeninging()", () => {
+    describe(".startListening()", () => {
         it("sets the flags and calls functions", () => {
             timersMock.setTimeout.andReturn(true);
             expect(instance.poller).toBe(null);

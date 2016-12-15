@@ -87,7 +87,9 @@ function runTests(methods, doneCb) {
  *
  * Use this when you expect that the method will fail.
  *
- * Example: methodFails("nameOfMethod", "param1", "param2", "param3");
+ * @example
+ * // returns {Function} nameOfMethod
+ * methodFails("nameOfMethod", "param1", "param2", "param3");
  *
  * @return {Function}
  */
@@ -118,7 +120,9 @@ function methodFails() {
  *
  * Use this when you expect that the method will succeed.
  *
- * Example: methodSucceeds("nameOfMethod", "param1", "param2", "param3");
+ * @example
+ * // returns {Function} nameOfMethod
+ * methodSucceeds("nameOfMethod", "param1", "param2", "param3");
  *
  * @return {Function}
  */
@@ -136,11 +140,12 @@ function methodSucceeds() {
 
 
 /**
- * Calls a list of methods one after another. This is used for testing that
- * commands run as expected when they are not called in a reasoned, methodical
- * order (i.e. one method calls the next in its callback).
+ * Calls a list of methods one after another. This is used for testing commands
+ * run as expected when they are not called in a reasoned, methodical order
+ * (i.e. one method calls the next in its callback).
  *
- * Example:
+ * @example
+ * // returns {Function} nameOfMethod
  *   combine([
  *       methodSucceeds("firstMethod"),
  *       methodSucceeds("secondMethod"),
@@ -206,7 +211,7 @@ describe("DDQ", () => {
         ];
         done = (err) => {
             expect(err).toBeUndefined();
-            expect(instance.backend.connection).not.toBeUndefined();
+            expect(instance.backend.connection).toBeDefined();
             instance.backend.connection.destroy();
             testComplete();
         };
