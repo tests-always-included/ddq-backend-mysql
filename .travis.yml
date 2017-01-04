@@ -17,3 +17,4 @@ script:
     - node node_modules/ddq/script/send-message-test mysql
     - node node_modules/ddq/script/polling-heartbeat-test mysql
     - jasmine-node script/functional-tests.spec.js
+    - codecov

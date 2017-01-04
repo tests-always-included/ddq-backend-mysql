@@ -4,7 +4,7 @@
     "description": "A backend plugin that DeDuplicated Queue (DDQ) can use to communicate with a MySQL database",
     "main": "./lib/index.js",
     "scripts": {
-        "test": "istanbul cover jasmine-node --captureExceptions spec/ && codecov && eslint .",
+        "test": "istanbul cover jasmine-node --captureExceptions spec/ && eslint .",
         "watch": "jasmine-node lib spec --autotest --watch"
     },
     "author": "DDQ Team",

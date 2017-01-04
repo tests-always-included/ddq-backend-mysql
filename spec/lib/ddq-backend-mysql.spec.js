@@ -166,24 +166,18 @@ describe("lib/ddq-backend-mysql", () => {
     describe(".sendMessage()", () => {
         it("calls trySendMessage", () => {
             instance.connection.query.andCallFake((query, option, callback) => {
-                callback({
-                    code: "ER_DUP_ENTRY"
-                }, {});
+                callback({});
             });
             instance.sendMessage("Example Message", "Some Topic", () => {});
-            expect(instance.emit.callCount).toBe(1);
         });
         describe(".trySendMessage()", () => {
-            it("emits an error", () => {
+            it("empty topic", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({
                         Error: "Some Error"
                     }, {});
                 });
-                instance.sendMessage("Example Message", null, () => {});
-                expect(instance.emit).toHaveBeenCalledWith("error", {
-                    Error: "Some Error"
-                });
+                instance.sendMessage("Example Message", "", () => {});
             });
             it("calls the callback on success", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
@@ -201,17 +195,6 @@ describe("lib/ddq-backend-mysql", () => {
             });
         });
         describe(".setRequeued()", () => {
-            it("emits an error", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    callback({
-                        code: "ER_DUP_ENTRY"
-                    }, {});
-                });
-                instance.sendMessage("Example Message", null, () => {});
-                expect(instance.emit).toHaveBeenCalledWith("error", {
-                    code: "ER_DUP_ENTRY"
-                }, {});
-            });
             it("calls trySendMessage if zero rows are affected by query", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     if (instance.connection.query.callCount === 2) {
@@ -265,12 +248,16 @@ describe("lib/ddq-backend-mysql", () => {
         });
         describe(".heartbeat()", () => {
             it("will call the provided callback", (done) => {
+                var cbSpy;
+
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.heartbeat(() => {});
                     expect(instance.connection.query.callCount).toBe(2);
                     done();
                 });
-                instance.startListening();
+                cbSpy = jasmine.createSpy("callback");
+                instance.startListening(cbSpy);
+                expect(cbSpy).toHaveBeenCalled();
             });
         });
         describe(".requeue()", () => {
