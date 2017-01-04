@@ -168,9 +168,9 @@ describe("lib/ddq-backend-mysql", () => {
             instance.connection.query.andCallFake((query, option, callback) => {
                 callback({
                     code: "ER_DUP_ENTRY"
-                });
+                }, {});
             });
-            instance.sendMessage("Example Message", () => {}, "Some Topic");
+            instance.sendMessage("Example Message", "Some Topic", () => {});
             expect(instance.emit.callCount).toBe(1);
         });
         describe(".trySendMessage()", () => {
@@ -178,23 +178,23 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({
                         Error: "Some Error"
-                    });
+                    }, {});
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
                 expect(instance.emit).toHaveBeenCalledWith("error", {
                     Error: "Some Error"
                 });
             });
             it("calls the callback on success", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
-                    callback(null);
+                    callback(null, {});
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
             });
             it("throws an error", () => {
                 instance.config.createMessageCycleLimit = 0;
                 expect(() => {
-                    instance.sendMessage("Example Message", (err) => {
+                    instance.sendMessage("Example Message", null, (err) => {
                         throw err;
                     });
                 }).toThrow(Error("Could not send message."));
@@ -205,12 +205,12 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({
                         code: "ER_DUP_ENTRY"
-                    });
+                    }, {});
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
                 expect(instance.emit).toHaveBeenCalledWith("error", {
                     code: "ER_DUP_ENTRY"
-                });
+                }, {});
             });
             it("calls trySendMessage if zero rows are affected by query", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
@@ -221,10 +221,10 @@ describe("lib/ddq-backend-mysql", () => {
                     } else {
                         callback({
                             code: "ER_DUP_ENTRY"
-                        });
+                        }, {});
                     }
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
             });
             it("calls the callback on success", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
@@ -236,7 +236,7 @@ describe("lib/ddq-backend-mysql", () => {
                         });
                     }
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
             });
         });
     });
