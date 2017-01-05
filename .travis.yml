@@ -11,7 +11,7 @@ before_install:
 services:
     - mysql
 before_script:
-    - bash node_modules/ddq/script/mysql-commands.sh
+    - bash mysql-commands.sh
 script:
     - node node_modules/ddq/script/wrapped-message-tests mysql
     - node node_modules/ddq/script/send-message-test mysql

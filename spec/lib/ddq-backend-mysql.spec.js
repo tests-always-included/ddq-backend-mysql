@@ -179,11 +179,11 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.sendMessage("Example Message", "", () => {});
             });
-            it("calls the callback on success", () => {
+            it("calls the callback on success no topic", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback(null, {});
                 });
-                instance.sendMessage("Example Message", null, () => {});
+                instance.sendMessage("Example Message", () => {});
             });
             it("throws an error", () => {
                 instance.config.createMessageCycleLimit = 0;
