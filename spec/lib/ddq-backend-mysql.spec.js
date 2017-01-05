@@ -179,12 +179,6 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.sendMessage("Example Message", "", () => {});
             });
-            it("calls the callback on success no topic", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    callback(null, {});
-                });
-                instance.sendMessage("Example Message", () => {});
-            });
             it("throws an error", () => {
                 instance.config.createMessageCycleLimit = 0;
                 expect(() => {
@@ -204,7 +198,7 @@ describe("lib/ddq-backend-mysql", () => {
                     } else {
                         callback({
                             code: "ER_DUP_ENTRY"
-                        }, {});
+                        });
                     }
                 });
                 instance.sendMessage("Example Message", null, () => {});
