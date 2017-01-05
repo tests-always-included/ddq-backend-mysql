@@ -10,5 +10,6 @@ CREATE TABLE queue (
     owner VARCHAR(256),
     isProcessing BOOLEAN DEFAULT FALSE,
     INDEX isProcessing(isProcessing),
-    topic VARCHAR(256)
+    topic VARCHAR(256),
+    messageBase64 VARCHAR(256)
 );

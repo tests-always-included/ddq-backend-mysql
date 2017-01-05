@@ -1,4 +1,4 @@
 #!/bin/bash
 
-mysql -u root -e < mysql-commands.sql
+mysql -uroot < mysql-commands.sql
 

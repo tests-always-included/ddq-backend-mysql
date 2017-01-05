@@ -11,10 +11,8 @@ before_install:
 services:
     - mysql
 before_script:
-    - bash mysql-commands.sh
+    - bash script/mysql-commands.sh
 script:
-    - node node_modules/ddq/script/wrapped-message-tests mysql
-    - node node_modules/ddq/script/send-message-test mysql
-    - node node_modules/ddq/script/polling-heartbeat-test mysql
+    - bash node_modules/ddq-backend-tests/run-tests.sh
     - jasmine-node script/functional-tests.spec.js
     - codecov

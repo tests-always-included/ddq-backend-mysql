@@ -25,18 +25,17 @@
         "mysql",
         "queue"
     ],
+    "repository": "https://github.com/tests-always-included/ddq-backend-mysql",
     "license": "MIT",
     "dependencies": {
         "mysql": "^2.11.1"
     },
     "devDependencies": {
         "codecov": "^1.0.1",
+        "ddq-backend-tests": "git://github.com/tests-always-included/ddq-backend-tests.git#initial",
         "eslint": "^2.10.2",
         "istanbul": "^0.4.5",
         "jasmine-node": "^1.14.5",
         "mock-require": "^1.3.0"
-    },
-    "peerDependencies": {
-        "ddq": "2.0.0"
     }
 }
