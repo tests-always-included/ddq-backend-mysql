@@ -175,7 +175,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({
                         Error: "Some Error"
-                    }, {});
+                    });
                 });
                 instance.sendMessage("Example Message", "", () => {});
             });
