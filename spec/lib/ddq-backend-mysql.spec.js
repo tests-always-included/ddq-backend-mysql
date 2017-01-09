@@ -143,6 +143,14 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
+            it("has no data to emit", (done) => {
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    callback(null, []);
+                });
+                instance.startListening();
+                expect(instance.emit).not.toHaveBeenCalled();
+                done();
+            });
             it("stops listening if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
                     instance.currentlyPolling = false;
