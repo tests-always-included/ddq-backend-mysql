@@ -1,10 +1,11 @@
 DeDuplicated Queue MySQL Plugin
 ===============================
 
-[![Build Status][travis-image]][Travis CI]
-[![Dependencies][dependencies-image]][Dependencies]
-[![Dev Dependencies][devdependencies-image]][Dev Dependencies]
-[![codecov.io][codecov-image]][Code Coverage]
+[![npm version][npm-badge]][npm-link]
+[![Build Status][travis-badge]][travis-link]
+[![Dependencies][dependencies-badge]][dependencies-link]
+[![Dev Dependencies][devdependencies-badge]][devdependencies-link]
+[![codecov.io][codecov-badge]][codecov-link]
 
 
 About
@@ -65,12 +66,13 @@ Here's an example of a DDQ config that would work with this plugin:
 This module doesn't support every config option that MySQL offers, but only those most pertinent to getting things working. The full suite of options can be found here: https://github.com/mysqljs/mysql#connection-options. If you'd like more options in this plugin supported, check out this contributing doc: https://github.com/tests-always-included/ddq-backend-mock/blob/master/CONTRIBUTING.md
 
 
-[Code Coverage]: https://codecov.io/github/tests-always-included/ddq-backend-mysql?branch=master
-[codecov-image]: https://codecov.io/github/tests-always-included/ddq-backend-mysql/coverage.svg?branch=master
-[Dev Dependencies]: https://david-dm.org/tests-always-included/ddq-backend-mysql#info=devDependencies
-[devdependencies-image]: https://david-dm.org/tests-always-included/ddq-backend-mysql/dev-status.png
-[Dependencies]: https://david-dm.org/tests-always-included/ddq-backend-mysql
-[dependencies-image]: https://david-dm.org/tests-always-included/ddq-backend-mysql.png
-[travis-image]: https://secure.travis-ci.org/tests-always-included/ddq-backend-mysql.png
-[Travis CI]: http://travis-ci.org/tests-always-included/ddq-backend-mysql
-
+[codecov-badge]: https://img.shields.io/codecov/c/github/tests-always-included/ddq-backend-mysql/master.svg
+[codecov-link]: https://codecov.io/github/tests-always-included/ddq-backend-mysql?branch=master
+[dependencies-badge]: https://img.shields.io/david/tests-always-included/ddq-backend-mysql.svg
+[dependencies-link]: https://david-dm.org/tests-always-included/ddq-backend-mysql
+[devdependencies-badge]: https://img.shields.io/david/dev/tests-always-included/ddq-backend-mysql.svg
+[devdependencies-link]: https://david-dm.org/tests-always-included/ddq-backend-mysql#info=devDependencies
+[npm-badge]: https://img.shields.io/npm/v/ddq-backend-mysql.svg
+[npm-link]: https://npmjs.org/package/ddq-backend-mysql
+[travis-badge]: https://img.shields.io/travis/tests-always-included/ddq-backend-mysql/master.svg
+[travis-link]: http://travis-ci.org/tests-always-included/ddq-backend-mysql
