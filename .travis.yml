@@ -14,5 +14,4 @@ before_script:
     - bash script/mysql-commands.sh
 script:
     - node script/functional-tests.js
-    - jasmine-node script/functional-tests.spec.js
     - codecov
