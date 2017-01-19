@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-mysql -uroot < mysql-commands.sql
+mysql -uroot < "${0%/*}"/mysql-commands.sql
 
