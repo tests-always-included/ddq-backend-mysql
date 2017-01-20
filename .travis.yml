@@ -13,6 +13,5 @@ services:
 before_script:
     - bash script/mysql-commands.sh
 script:
-    - bash node_modules/ddq-backend-tests/run-tests.sh
-    - jasmine-node script/functional-tests.spec.js
+    - node script/functional-tests.js
     - codecov

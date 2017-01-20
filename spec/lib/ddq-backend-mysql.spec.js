@@ -143,6 +143,27 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
+            it("fails on begin transaction", (done) => {
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    callback(null, [
+                        {
+                            hash: 123,
+                            message: "SomeMessage",
+                            messageBase64: 456,
+                            topic: "SomeTopic"
+                        }
+                    ]);
+                });
+                instance.connection.beginTransaction.andCallFake((callback) => {
+                    callback(new Error("FAILED TO TRANSACT"));
+                });
+                instance.on("error", (err) => {
+                    expect(err).toEqual(new Error("FAILED TO TRANSACT"));
+                    expect(instance.connection.query).not.toHaveBeenCalled();
+                    done();
+                });
+                instance.startListening();
+            });
             it("has no data to emit", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
                     callback(null, []);
@@ -150,6 +171,49 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.startListening();
                 expect(instance.emit).not.toHaveBeenCalled();
                 done();
+            });
+            it("fails on update", (done) => {
+                instance.connection.query.andCallFake((query, opts, callback) => {
+                    if (instance.connection.query.callCount === 2) {
+                        callback(new Error("FAILED TO UPDATE"));
+                    } else {
+                        callback(null, [
+                            {
+                                hash: 123,
+                                message: "SomeMessage",
+                                messageBase64: 456,
+                                topic: "SomeTopic"
+                            }
+                        ]);
+                    }
+                });
+                instance.on("error", (err) => {
+                    expect(err).toEqual(new Error("FAILED TO UPDATE"));
+                    expect(instance.connection.query.callCount).toBe(2);
+                    done();
+                });
+                instance.startListening();
+            });
+            it("fails on commit", (done) => {
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    callback(null, [
+                        {
+                            hash: 123,
+                            message: "SomeMessage",
+                            messageBase64: 456,
+                            topic: "SomeTopic"
+                        }
+                    ]);
+                });
+                instance.connection.commit.andCallFake((callback) => {
+                    callback(new Error("FAILED TO COMMIT"));
+                });
+                instance.on("error", (err) => {
+                    expect(err).toEqual(new Error("FAILED TO COMMIT"));
+                    expect(instance.connection.query.callCount).toBe(2);
+                    done();
+                });
+                instance.startListening();
             });
             it("stops listening if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -174,7 +238,7 @@ describe("lib/ddq-backend-mysql", () => {
     describe(".sendMessage()", () => {
         it("calls trySendMessage", () => {
             instance.connection.query.andCallFake((query, option, callback) => {
-                callback({});
+                callback();
             });
             instance.sendMessage("Example Message", "Some Topic", () => {});
         });
@@ -254,7 +318,7 @@ describe("lib/ddq-backend-mysql", () => {
 
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.heartbeat(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
                 cbSpy = jasmine.createSpy("callback");
@@ -266,7 +330,7 @@ describe("lib/ddq-backend-mysql", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.requeue(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
                 instance.startListening();
@@ -276,14 +340,14 @@ describe("lib/ddq-backend-mysql", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
                 instance.startListening();
             });
             it("will call requeue on error", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
-                    if (instance.connection.query.callCount === 1) {
+                    if (instance.connection.query.callCount <= 2) {
                         callback(null, [
                             {
                                 hash: 123,
@@ -294,7 +358,7 @@ describe("lib/ddq-backend-mysql", () => {
                                 ]
                             }
                         ]);
-                    } else {
+                    } else if (instance.connection.query.callCount > 2) {
                         callback({
                             Error: "Some Error"
                         });
@@ -302,7 +366,7 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(instance.connection.query.callCount).toBe(4);
                     done();
                 });
                 instance.startListening();
