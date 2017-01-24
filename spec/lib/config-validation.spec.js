@@ -12,6 +12,7 @@ describe("lib/config-validation", () => {
             it("throws an error if topics is not an array, string or null", () => {
                 config = {
                     createMessageCycleLimit: 1000,
+                    deadlockCountLimit: 2,
                     pollingDelayMs: 1000,
                     heartbeatCleanupDelayMs: 50000,
                     heartbeatLifetimeSeconds: 5,
@@ -49,6 +50,7 @@ describe("lib/config-validation", () => {
             it("accepts arrays of strings and NULL", () => {
                 config = {
                     createMessageCycleLimit: 1000,
+                    deadlockCountLimit: 2,
                     pollingDelayMs: 1000,
                     heartbeatCleanupDelayMs: 50000,
                     heartbeatLifetimeSeconds: 5,
@@ -99,6 +101,7 @@ describe("lib/config-validation", () => {
         it("accepts a valid config", () => {
             config = {
                 createMessageCycleLimit: 1000,
+                deadlockCountLimit: 5,
                 pollingDelayMs: 1000,
                 heartbeatCleanupDelayMs: 50000,
                 heartbeatLifetimeSeconds: 5,

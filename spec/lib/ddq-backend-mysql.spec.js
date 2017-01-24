@@ -8,6 +8,7 @@ describe("lib/ddq-backend-mysql", () => {
 
         config = {
             createMessageCycleLimit: 10,
+            deadlockCountLimit: 2,
             pollingDelayMs: 1000,
             heartbeatCleanupDelayMs: 5000,
             host: "localhost",
@@ -233,6 +234,39 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
+            it("gets deadlock but continues on", (done) => {
+                var err;
+
+                err = new Error("Deadlock");
+                err.code = "ER_LOCK_DEADLOCK";
+
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for polling.
+                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    if (instance.connection.query.callCount === 1) {
+                        callback(err, null);
+                    } else {
+                        callback(null, [
+                            {
+                                hash: 123,
+                                message: "SomeMessage",
+                                messageBase64: 456,
+                                topic: "SomeTopic"
+                            }
+                        ]);
+                    }
+                });
+                instance.on("data", () => {
+                    expect(timersMock.setTimeout.callCount).toBe(3);
+                    expect(instance.connection.query.callCount).toBe(3);
+                    done();
+                });
+                instance.startListening();
+            });
         });
     });
     describe(".sendMessage()", () => {
@@ -423,6 +457,28 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.on("error", () => {
                     expect(timersMock.setTimeout.callCount).toBe(1);
                     done();
+                });
+                instance.startListening();
+            });
+            it("deadlocks and continues", (done) => {
+                var err;
+
+                err = new Error("Deadlock");
+                err.code = "ER_LOCK_DEADLOCK";
+
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for restore.
+                    if (time === 5000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    if (instance.connection.query.callCount === 1) {
+                        callback(err, null);
+                    } else {
+                        callback();
+                        done();
+                    }
                 });
                 instance.startListening();
             });

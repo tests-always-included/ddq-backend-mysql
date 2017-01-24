@@ -61,6 +61,7 @@ Here's an example of a DDQ config that would work with this plugin:
 * `port` - The port number to connect to. Default: `3306`
 * `table` - The table the MySQL commands will act on.
 * `user` - The MySQL user to authenticate as.
+* `deadlockCountLimit` - Limit of consecutive deadlocks allowed before emitting an error. The polling and restoring cycles by nature can cause deadlocks with multiple listeners started at the sametime with the same cycle delay.
 
 This module doesn't support every config option that MySQL offers, but only those most pertinent to getting things working. The full suite of options can be found here: https://github.com/mysqljs/mysql#connection-options. If you'd like more options in this plugin supported, check out this contributing doc: https://github.com/tests-always-included/ddq-backend-mock/blob/master/CONTRIBUTING.md
 
