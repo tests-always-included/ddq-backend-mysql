@@ -9,7 +9,7 @@ CREATE TABLE queue (
     heartbeatDate DATETIME,
     owner VARCHAR(256),
     isProcessing BOOLEAN DEFAULT FALSE,
-    index isProcessing(isProcessing),
+    INDEX isProcessing(isProcessing),
     topic VARCHAR(256),
     messageBase64 VARCHAR(256)
 );
