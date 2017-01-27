@@ -4,10 +4,11 @@ describe("lib/ddq-backend-mysql", () => {
     var EventEmitter, instance, mysqlMock, Plugin, timersMock;
 
     beforeEach(() => {
-        var config, configValidationMock, crypto;
+        var config, configValidationMock, crypto, debug;
 
         config = {
             createMessageCycleLimit: 10,
+            deadlockCountLimit: 2,
             pollingDelayMs: 1000,
             heartbeatCleanupDelayMs: 5000,
             host: "localhost",
@@ -32,7 +33,8 @@ describe("lib/ddq-backend-mysql", () => {
             "setTimeout",
             "clearTimeout"
         ]);
-        Plugin = require("../../lib/ddq-backend-mysql")(configValidationMock, crypto, EventEmitter, mysqlMock, timersMock);
+        debug = jasmine.createSpy("debug");
+        Plugin = require("../../lib/ddq-backend-mysql")(configValidationMock, crypto, debug, EventEmitter, mysqlMock, timersMock);
         instance = new Plugin(config);
         instance.connect(() => {});
         spyOn(instance, "emit");
@@ -57,36 +59,43 @@ describe("lib/ddq-backend-mysql", () => {
             expect(instance.connection.end).toHaveBeenCalledWith(jasmine.any(Function));
         });
     });
-    describe(".listen()", () => {
+    describe(".startListening()", () => {
         it("sets the flags and calls functions", () => {
             timersMock.setTimeout.andReturn(true);
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
-            instance.listen();
+            instance.startListening();
             expect(instance.currentlyPolling).toBe(true);
             expect(instance.poller).not.toEqual(false);
             expect(instance.restorer).not.toEqual(false);
             expect(timersMock.setTimeout).toHaveBeenCalled();
         });
     });
-    describe(".pausePolling()", () => {
+    describe(".stopListening()", () => {
         it("clears the timeouts and sets the flags", () => {
-            spyOn(instance, "listen");
+            spyOn(instance, "startListening");
             instance.poller = true;
             instance.restorer = true;
             instance.currentlyPolling = true;
             instance.currentlyRestoring = true;
-            instance.listen();
-            instance.pausePolling();
+            instance.startListening();
+            instance.stopListening();
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
             expect(instance.currentlyPolling).toBe(false);
             expect(instance.currentlyRestoring).toBe(false);
             expect(timersMock.clearTimeout).toHaveBeenCalled();
         });
-        it("does nothing if the plugin isn't already polling", () => {
-            instance.pausePolling();
+        it("does nothing if the plugin isn't already listening", () => {
+            instance.stopListening();
             expect(timersMock.clearTimeout).not.toHaveBeenCalled();
+        });
+        it("calls the callback if one is passed", () => {
+            var callback;
+
+            callback = jasmine.createSpy();
+            instance.stopListening(callback);
+            expect(callback).toHaveBeenCalled();
         });
     });
     describe(".poll()", () => {
@@ -111,7 +120,7 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(instance.emit).not.toHaveBeenCalledWith("error", {});
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("emits data", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -134,9 +143,44 @@ describe("lib/ddq-backend-mysql", () => {
                     });
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
-            it("stops polling if the flag isn't set", (done) => {
+            it("has no data to emit", (done) => {
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    callback(null, []);
+                });
+                instance.startListening();
+                expect(instance.emit).not.toHaveBeenCalled();
+                done();
+            });
+            it("fails on update", (done) => {
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for polling.
+                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
+                instance.connection.query.andCallFake((query, opts, callback) => {
+                    if (instance.connection.query.callCount === 2) {
+                        callback(new Error("FAILED TO UPDATE"));
+                    } else {
+                        callback(null, [
+                            {
+                                hash: 123,
+                                message: "SomeMessage",
+                                messageBase64: 456,
+                                topic: "SomeTopic"
+                            }
+                        ]);
+                    }
+                });
+                instance.on("data", () => {
+                    expect(instance.connection.query.callCount).toBe(4);
+                    done();
+                });
+                instance.startListening();
+            });
+            it("stops listening if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
                     instance.currentlyPolling = false;
                     callback(null, [
@@ -152,71 +196,69 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(timersMock.setTimeout.callCount).toBe(2);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
-        });
-    });
-    describe(".resumePolling()", () => {
-        it("sets the flag and calls functions", () => {
-            timersMock.setTimeout.andReturn(true);
-            expect(instance.poller).toBe(null);
-            expect(instance.restorer).toBe(null);
-            instance.resumePolling();
-            expect(instance.currentlyPolling).toBe(true);
-            expect(instance.poller).not.toEqual(false);
-            expect(instance.restorer).not.toEqual(false);
-            expect(timersMock.setTimeout).toHaveBeenCalled();
+            it("gets deadlock but continues on", (done) => {
+                var err;
+
+                err = new Error("Deadlock");
+                err.code = "ER_LOCK_DEADLOCK";
+
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for polling.
+                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    if (instance.connection.query.callCount === 1) {
+                        callback(err, null);
+                    } else {
+                        callback(null, [
+                            {
+                                hash: 123,
+                                message: "SomeMessage",
+                                messageBase64: 456,
+                                topic: "SomeTopic"
+                            }
+                        ]);
+                    }
+                });
+                instance.on("data", () => {
+                    expect(timersMock.setTimeout.callCount).toBe(3);
+                    expect(instance.connection.query.callCount).toBe(3);
+                    done();
+                });
+                instance.startListening();
+            });
         });
     });
     describe(".sendMessage()", () => {
         it("calls trySendMessage", () => {
             instance.connection.query.andCallFake((query, option, callback) => {
-                callback({
-                    code: "ER_DUP_ENTRY"
-                });
+                callback();
             });
-            instance.sendMessage("Example Message", () => {}, "Some Topic");
-            expect(instance.emit.callCount).toBe(1);
+            instance.sendMessage("Example Message", "Some Topic", () => {});
         });
         describe(".trySendMessage()", () => {
-            it("emits an error", () => {
+            it("empty topic", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     callback({
                         Error: "Some Error"
                     });
                 });
-                instance.sendMessage("Example Message", () => {});
-                expect(instance.emit).toHaveBeenCalledWith("error", {
-                    Error: "Some Error"
-                });
-            });
-            it("calls the callback on success", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    callback(null);
-                });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", "", () => {});
             });
             it("throws an error", () => {
                 instance.config.createMessageCycleLimit = 0;
                 expect(() => {
-                    instance.sendMessage("Example Message", (err) => {
+                    instance.sendMessage("Example Message", null, (err) => {
                         throw err;
                     });
                 }).toThrow(Error("Could not send message."));
             });
         });
         describe(".setRequeued()", () => {
-            it("emits an error", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    callback({
-                        code: "ER_DUP_ENTRY"
-                    });
-                });
-                instance.sendMessage("Example Message", () => {});
-                expect(instance.emit).toHaveBeenCalledWith("error", {
-                    code: "ER_DUP_ENTRY"
-                });
-            });
             it("calls trySendMessage if zero rows are affected by query", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
                     if (instance.connection.query.callCount === 2) {
@@ -229,7 +271,7 @@ describe("lib/ddq-backend-mysql", () => {
                         });
                     }
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
             });
             it("calls the callback on success", () => {
                 instance.connection.query.andCallFake((query, option, callback) => {
@@ -241,7 +283,7 @@ describe("lib/ddq-backend-mysql", () => {
                         });
                     }
                 });
-                instance.sendMessage("Example Message", () => {});
+                instance.sendMessage("Example Message", null, () => {});
             });
         });
     });
@@ -270,36 +312,40 @@ describe("lib/ddq-backend-mysql", () => {
         });
         describe(".heartbeat()", () => {
             it("will call the provided callback", (done) => {
+                var cbSpy;
+
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.heartbeat(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
-                instance.listen();
+                cbSpy = jasmine.createSpy("callback");
+                instance.startListening(cbSpy);
+                expect(cbSpy).toHaveBeenCalled();
             });
         });
         describe(".requeue()", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.requeue(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
         describe(".remove()", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(2);
+                    expect(instance.connection.query.callCount).toBe(3);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("will call requeue on error", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
-                    if (instance.connection.query.callCount === 1) {
+                    if (instance.connection.query.callCount <= 2) {
                         callback(null, [
                             {
                                 hash: 123,
@@ -309,19 +355,23 @@ describe("lib/ddq-backend-mysql", () => {
                                     "topics"
                                 ]
                             }
-                        ]);
-                    } else {
+                        ], {
+                            affectedRows: 1
+                        });
+                    } else if (instance.connection.query.callCount > 2) {
                         callback({
                             Error: "Some Error"
+                        }, {
+                            affectedRows: 0
                         });
                     }
                 });
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(instance.connection.query.callCount).toBe(4);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
         });
     });
@@ -349,7 +399,7 @@ describe("lib/ddq-backend-mysql", () => {
                     });
                     done();
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("doesn't emit on success", (done) => {
                 timersMock.setTimeout.andCallFake((callback) => {
@@ -363,7 +413,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.connection.query.andCallFake((query, queryOptions, callback) => {
                     callback(null);
                 });
-                instance.listen();
+                instance.startListening();
             });
             it("stops restoring if the flag isn't set", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
@@ -376,7 +426,29 @@ describe("lib/ddq-backend-mysql", () => {
                     expect(timersMock.setTimeout.callCount).toBe(1);
                     done();
                 });
-                instance.listen();
+                instance.startListening();
+            });
+            it("deadlocks and continues", (done) => {
+                var err;
+
+                err = new Error("Deadlock");
+                err.code = "ER_LOCK_DEADLOCK";
+
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for restore.
+                    if (time === 5000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
+                instance.connection.query.andCallFake((query, options, callback) => {
+                    if (instance.connection.query.callCount === 1) {
+                        callback(err, null);
+                    } else {
+                        callback();
+                        done();
+                    }
+                });
+                instance.startListening();
             });
         });
     });
