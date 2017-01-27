@@ -33,7 +33,7 @@
     "devDependencies": {
         "codecov": "^1.0.1",
         "debug": "^2.6.0",
-        "ddq-backend-tests": "git://github.com/tests-always-included/ddq-backend-tests.git#initial",
+        "ddq-backend-tests": "^2.0.0",
         "eslint": "^2.10.2",
         "istanbul": "^0.4.5",
         "jasmine-node": "^1.14.5",

@@ -4,7 +4,7 @@ describe("lib/ddq-backend-mysql", () => {
     var EventEmitter, instance, mysqlMock, Plugin, timersMock;
 
     beforeEach(() => {
-        var config, configValidationMock, crypto;
+        var config, configValidationMock, crypto, debug;
 
         config = {
             createMessageCycleLimit: 10,
@@ -33,7 +33,8 @@ describe("lib/ddq-backend-mysql", () => {
             "setTimeout",
             "clearTimeout"
         ]);
-        Plugin = require("../../lib/ddq-backend-mysql")(configValidationMock, crypto, EventEmitter, mysqlMock, timersMock);
+        debug = jasmine.createSpy("debug");
+        Plugin = require("../../lib/ddq-backend-mysql")(configValidationMock, crypto, debug, EventEmitter, mysqlMock, timersMock);
         instance = new Plugin(config);
         instance.connect(() => {});
         spyOn(instance, "emit");
@@ -144,27 +145,6 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
-            it("fails on begin transaction", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
-                    callback(null, [
-                        {
-                            hash: 123,
-                            message: "SomeMessage",
-                            messageBase64: 456,
-                            topic: "SomeTopic"
-                        }
-                    ]);
-                });
-                instance.connection.beginTransaction.andCallFake((callback) => {
-                    callback(new Error("FAILED TO TRANSACT"));
-                });
-                instance.on("error", (err) => {
-                    expect(err).toEqual(new Error("FAILED TO TRANSACT"));
-                    expect(instance.connection.query).not.toHaveBeenCalled();
-                    done();
-                });
-                instance.startListening();
-            });
             it("has no data to emit", (done) => {
                 instance.connection.query.andCallFake((query, options, callback) => {
                     callback(null, []);
@@ -174,6 +154,12 @@ describe("lib/ddq-backend-mysql", () => {
                 done();
             });
             it("fails on update", (done) => {
+                timersMock.setTimeout.andCallFake((callback, time) => {
+                    // Hacky method of only calling for polling.
+                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                        callback();
+                    }
+                });
                 instance.connection.query.andCallFake((query, opts, callback) => {
                     if (instance.connection.query.callCount === 2) {
                         callback(new Error("FAILED TO UPDATE"));
@@ -188,30 +174,8 @@ describe("lib/ddq-backend-mysql", () => {
                         ]);
                     }
                 });
-                instance.on("error", (err) => {
-                    expect(err).toEqual(new Error("FAILED TO UPDATE"));
-                    expect(instance.connection.query.callCount).toBe(2);
-                    done();
-                });
-                instance.startListening();
-            });
-            it("fails on commit", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
-                    callback(null, [
-                        {
-                            hash: 123,
-                            message: "SomeMessage",
-                            messageBase64: 456,
-                            topic: "SomeTopic"
-                        }
-                    ]);
-                });
-                instance.connection.commit.andCallFake((callback) => {
-                    callback(new Error("FAILED TO COMMIT"));
-                });
-                instance.on("error", (err) => {
-                    expect(err).toEqual(new Error("FAILED TO COMMIT"));
-                    expect(instance.connection.query.callCount).toBe(2);
+                instance.on("data", () => {
+                    expect(instance.connection.query.callCount).toBe(4);
                     done();
                 });
                 instance.startListening();
@@ -391,10 +355,14 @@ describe("lib/ddq-backend-mysql", () => {
                                     "topics"
                                 ]
                             }
-                        ]);
+                        ], {
+                            affectedRows: 1
+                        });
                     } else if (instance.connection.query.callCount > 2) {
                         callback({
                             Error: "Some Error"
+                        }, {
+                            affectedRows: 0
                         });
                     }
                 });

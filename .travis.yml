@@ -13,5 +13,6 @@ services:
 before_script:
     - bash script/mysql-commands.sh
 script:
+    - npm test
     - node script/functional-tests.js
     - codecov
