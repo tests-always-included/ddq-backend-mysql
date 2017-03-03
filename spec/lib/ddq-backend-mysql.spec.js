@@ -61,7 +61,7 @@ describe("lib/ddq-backend-mysql", () => {
     });
     describe(".startListening()", () => {
         it("sets the flags and calls functions", () => {
-            timersMock.setTimeout.andReturn(true);
+            timersMock.setTimeout.and.returnValue(true);
             expect(instance.poller).toBe(null);
             expect(instance.restorer).toBe(null);
             instance.startListening();
@@ -101,17 +101,17 @@ describe("lib/ddq-backend-mysql", () => {
     describe(".poll()", () => {
         describe(".checkNow()", () => {
             beforeEach(() => {
-                timersMock.setTimeout.andCallFake((callback) => {
-                    if (timersMock.setTimeout.callCount === 1) {
+                timersMock.setTimeout.and.callFake((callback) => {
+                    if (timersMock.setTimeout.calls.count() === 1) {
                         return;
-                    } else if (timersMock.setTimeout.callCount === 2) {
+                    } else if (timersMock.setTimeout.calls.count() === 2) {
                         callback();
                     }
                 });
-                instance.emit.andCallThrough();
+                instance.emit.and.callThrough();
             });
             it("emits on error", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
+                instance.connection.query.and.callFake((query, options, callback) => {
                     callback({
                         Error: "Some Error"
                     });
@@ -123,7 +123,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.startListening();
             });
             it("emits data", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
+                instance.connection.query.and.callFake((query, options, callback) => {
                     callback(null, [
                         {
                             hash: 123,
@@ -146,7 +146,7 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.startListening();
             });
             it("has no data to emit", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
+                instance.connection.query.and.callFake((query, options, callback) => {
                     callback(null, []);
                 });
                 instance.startListening();
@@ -154,14 +154,14 @@ describe("lib/ddq-backend-mysql", () => {
                 done();
             });
             it("fails on update", (done) => {
-                timersMock.setTimeout.andCallFake((callback, time) => {
+                timersMock.setTimeout.and.callFake((callback, time) => {
                     // Hacky method of only calling for polling.
-                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                    if (time === 1000 && timersMock.setTimeout.calls.count() < 4) {
                         callback();
                     }
                 });
-                instance.connection.query.andCallFake((query, opts, callback) => {
-                    if (instance.connection.query.callCount === 2) {
+                instance.connection.query.and.callFake((query, opts, callback) => {
+                    if (instance.connection.query.calls.count() === 2) {
                         callback(new Error("FAILED TO UPDATE"));
                     } else {
                         callback(null, [
@@ -175,13 +175,14 @@ describe("lib/ddq-backend-mysql", () => {
                     }
                 });
                 instance.on("data", () => {
-                    expect(instance.connection.query.callCount).toBe(4);
+                    expect(instance.connection.query.calls.count()).toBe(4);
+                    instance.currentlyPolling = false;
                     done();
                 });
                 instance.startListening();
             });
             it("stops listening if the flag isn't set", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
+                instance.connection.query.and.callFake((query, options, callback) => {
                     instance.currentlyPolling = false;
                     callback(null, [
                         {
@@ -193,7 +194,7 @@ describe("lib/ddq-backend-mysql", () => {
                     ]);
                 });
                 instance.on("data", () => {
-                    expect(timersMock.setTimeout.callCount).toBe(2);
+                    expect(timersMock.setTimeout.calls.count()).toBe(2);
                     done();
                 });
                 instance.startListening();
@@ -204,14 +205,14 @@ describe("lib/ddq-backend-mysql", () => {
                 err = new Error("Deadlock");
                 err.code = "ER_LOCK_DEADLOCK";
 
-                timersMock.setTimeout.andCallFake((callback, time) => {
+                timersMock.setTimeout.and.callFake((callback, time) => {
                     // Hacky method of only calling for polling.
-                    if (time === 1000 && timersMock.setTimeout.callCount < 4) {
+                    if (time === 1000 && timersMock.setTimeout.calls.count() < 4) {
                         callback();
                     }
                 });
-                instance.connection.query.andCallFake((query, options, callback) => {
-                    if (instance.connection.query.callCount === 1) {
+                instance.connection.query.and.callFake((query, options, callback) => {
+                    if (instance.connection.query.calls.count() === 1) {
                         callback(err, null);
                     } else {
                         callback(null, [
@@ -225,8 +226,8 @@ describe("lib/ddq-backend-mysql", () => {
                     }
                 });
                 instance.on("data", () => {
-                    expect(timersMock.setTimeout.callCount).toBe(3);
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(timersMock.setTimeout.calls.count()).toBe(3);
+                    expect(instance.connection.query.calls.count()).toBe(3);
                     done();
                 });
                 instance.startListening();
@@ -235,14 +236,14 @@ describe("lib/ddq-backend-mysql", () => {
     });
     describe(".sendMessage()", () => {
         it("calls trySendMessage", () => {
-            instance.connection.query.andCallFake((query, option, callback) => {
+            instance.connection.query.and.callFake((query, option, callback) => {
                 callback();
             });
             instance.sendMessage("Example Message", "Some Topic", () => {});
         });
         describe(".trySendMessage()", () => {
             it("empty topic", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
+                instance.connection.query.and.callFake((query, option, callback) => {
                     callback({
                         Error: "Some Error"
                     });
@@ -260,8 +261,8 @@ describe("lib/ddq-backend-mysql", () => {
         });
         describe(".setRequeued()", () => {
             it("calls trySendMessage if zero rows are affected by query", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    if (instance.connection.query.callCount === 2) {
+                instance.connection.query.and.callFake((query, option, callback) => {
+                    if (instance.connection.query.calls.count() === 2) {
                         callback(null, {
                             affectedRows: 0
                         });
@@ -274,8 +275,8 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.sendMessage("Example Message", null, () => {});
             });
             it("calls the callback on success", () => {
-                instance.connection.query.andCallFake((query, option, callback) => {
-                    if (instance.connection.query.callCount === 2) {
+                instance.connection.query.and.callFake((query, option, callback) => {
+                    if (instance.connection.query.calls.count() === 2) {
                         callback(null, () => {});
                     } else {
                         callback({
@@ -289,15 +290,15 @@ describe("lib/ddq-backend-mysql", () => {
     });
     describe("wrapped message functions:", () => {
         beforeEach(() => {
-            timersMock.setTimeout.andCallFake((callback) => {
-                if (timersMock.setTimeout.callCount === 1) {
+            timersMock.setTimeout.and.callFake((callback) => {
+                if (timersMock.setTimeout.calls.count() === 1) {
                     return;
-                } else if (timersMock.setTimeout.callCount === 2) {
+                } else if (timersMock.setTimeout.calls.count() === 2) {
                     callback();
                 }
             });
-            instance.emit.andCallThrough();
-            instance.connection.query.andCallFake((query, options, callback) => {
+            instance.emit.and.callThrough();
+            instance.connection.query.and.callFake((query, options, callback) => {
                 callback(null, [
                     {
                         hash: 123,
@@ -316,7 +317,7 @@ describe("lib/ddq-backend-mysql", () => {
 
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.heartbeat(() => {});
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(instance.connection.query.calls.count()).toBe(3);
                     done();
                 });
                 cbSpy = jasmine.createSpy("callback");
@@ -328,7 +329,7 @@ describe("lib/ddq-backend-mysql", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.requeue(() => {});
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(instance.connection.query.calls.count()).toBe(3);
                     done();
                 });
                 instance.startListening();
@@ -338,14 +339,14 @@ describe("lib/ddq-backend-mysql", () => {
             it("will call the provided callback", (done) => {
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(3);
+                    expect(instance.connection.query.calls.count()).toBe(3);
                     done();
                 });
                 instance.startListening();
             });
             it("will call requeue on error", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
-                    if (instance.connection.query.callCount <= 2) {
+                instance.connection.query.and.callFake((query, options, callback) => {
+                    if (instance.connection.query.calls.count() <= 2) {
                         callback(null, [
                             {
                                 hash: 123,
@@ -358,7 +359,7 @@ describe("lib/ddq-backend-mysql", () => {
                         ], {
                             affectedRows: 1
                         });
-                    } else if (instance.connection.query.callCount > 2) {
+                    } else if (instance.connection.query.calls.count() > 2) {
                         callback({
                             Error: "Some Error"
                         }, {
@@ -368,7 +369,7 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.on("data", (wrappedMessage) => {
                     wrappedMessage.remove(() => {});
-                    expect(instance.connection.query.callCount).toBe(4);
+                    expect(instance.connection.query.calls.count()).toBe(4);
                     done();
                 });
                 instance.startListening();
@@ -378,17 +379,17 @@ describe("lib/ddq-backend-mysql", () => {
     describe(".restore()", () => {
         describe(".heartbeatCleanup", () => {
             beforeEach(() => {
-                timersMock.setTimeout.andCallFake((callback) => {
-                    if (timersMock.setTimeout.callCount === 1) {
+                timersMock.setTimeout.and.callFake((callback) => {
+                    if (timersMock.setTimeout.calls.count() === 1) {
                         callback();
-                    } else if (timersMock.setTimeout.callCount === 2) {
+                    } else if (timersMock.setTimeout.calls.count() === 2) {
                         return;
                     }
                 });
-                instance.emit.andCallThrough();
+                instance.emit.and.callThrough();
             });
             it("emits on error", (done) => {
-                instance.connection.query.andCallFake((query, queryOptions, callback) => {
+                instance.connection.query.and.callFake((query, queryOptions, callback) => {
                     callback({
                         Error: "Some Error"
                     });
@@ -402,28 +403,28 @@ describe("lib/ddq-backend-mysql", () => {
                 instance.startListening();
             });
             it("doesn't emit on success", (done) => {
-                timersMock.setTimeout.andCallFake((callback) => {
-                    if (timersMock.setTimeout.callCount === 1) {
+                timersMock.setTimeout.and.callFake((callback) => {
+                    if (timersMock.setTimeout.calls.count() === 1) {
                         callback();
                     } else {
-                        expect(instance.emit.callCount).toBe(0);
+                        expect(instance.emit.calls.count()).toBe(0);
                         done();
                     }
                 });
-                instance.connection.query.andCallFake((query, queryOptions, callback) => {
+                instance.connection.query.and.callFake((query, queryOptions, callback) => {
                     callback(null);
                 });
                 instance.startListening();
             });
             it("stops restoring if the flag isn't set", (done) => {
-                instance.connection.query.andCallFake((query, options, callback) => {
+                instance.connection.query.and.callFake((query, options, callback) => {
                     instance.currentlyRestoring = false;
                     callback({
                         Error: "Some Error"
                     });
                 });
                 instance.on("error", () => {
-                    expect(timersMock.setTimeout.callCount).toBe(1);
+                    expect(timersMock.setTimeout.calls.count()).toBe(1);
                     done();
                 });
                 instance.startListening();
@@ -434,14 +435,14 @@ describe("lib/ddq-backend-mysql", () => {
                 err = new Error("Deadlock");
                 err.code = "ER_LOCK_DEADLOCK";
 
-                timersMock.setTimeout.andCallFake((callback, time) => {
+                timersMock.setTimeout.and.callFake((callback, time) => {
                     // Hacky method of only calling for restore.
-                    if (time === 5000 && timersMock.setTimeout.callCount < 4) {
+                    if (time === 5000 && timersMock.setTimeout.calls.count() < 4) {
                         callback();
                     }
                 });
-                instance.connection.query.andCallFake((query, options, callback) => {
-                    if (instance.connection.query.callCount === 1) {
+                instance.connection.query.and.callFake((query, options, callback) => {
+                    if (instance.connection.query.calls.count() === 1) {
                         callback(err, null);
                     } else {
                         callback();

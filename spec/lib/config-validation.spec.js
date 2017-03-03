@@ -5,7 +5,7 @@ describe("lib/config-validation", () => {
 
     beforeEach(() => {
         configValidation = require("../../lib/config-validation.js")();
-        spyOn(configValidation, "validateConfig").andCallThrough();
+        spyOn(configValidation, "validateConfig").and.callThrough();
     });
     describe(".validateConfig()", () => {
         describe("topic handling:", () => {
