@@ -21,14 +21,14 @@ module.exports = () => {
     ]);
 
     connection = {
-        connect: jasmine.createSpy("connect").andCallFake(call),
-        beginTransaction: jasmine.createSpy("beginTransaction").andCallFake(call),
-        rollback: jasmine.createSpy("rollback").andCallFake(call),
-        commit: jasmine.createSpy("commit").andCallFake(call),
-        end: jasmine.createSpy("end").andCallFake(() => {}),
+        connect: jasmine.createSpy("connect").and.callFake(call),
+        beginTransaction: jasmine.createSpy("beginTransaction").and.callFake(call),
+        rollback: jasmine.createSpy("rollback").and.callFake(call),
+        commit: jasmine.createSpy("commit").and.callFake(call),
+        end: jasmine.createSpy("end").and.callFake(() => {}),
         query: jasmine.createSpy("query")
     };
-    mock.createConnection.andReturn(connection);
+    mock.createConnection.and.returnValue(connection);
 
     return mock;
 };
