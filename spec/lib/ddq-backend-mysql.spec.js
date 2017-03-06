@@ -402,9 +402,12 @@ describe("lib/ddq-backend-mysql", () => {
                 });
                 instance.startListening();
             });
-            it("doesn't emit on success", (done) => {
+            it("doesn't emit on success and stops restoring after one round", (done) => {
+                // After switching to Jasmine 2 this branch was exposed as not
+                // being tested.
                 timersMock.setTimeout.and.callFake((callback) => {
-                    if (timersMock.setTimeout.calls.count() === 1) {
+                    if (timersMock.setTimeout.calls.count() < 3) {
+                        instance.currentlyRestoring = false;
                         callback();
                     } else {
                         expect(instance.emit.calls.count()).toBe(0);
@@ -412,7 +415,7 @@ describe("lib/ddq-backend-mysql", () => {
                     }
                 });
                 instance.connection.query.and.callFake((query, queryOptions, callback) => {
-                    callback(null);
+                    callback(null, []);
                 });
                 instance.startListening();
             });
